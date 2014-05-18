@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ecf0f1">
+
+
+
+
+    <com.twitterdev.rdio.app.DynamicImageView android:id="@+id/albumArt"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <View
+        android:id="@+id/myRectangleView"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/rectangle"/>
+
+    <ImageView android:id="@+id/playPause" android:src="@drawable/play" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="47dp"
+         />
+
+    <ImageView android:id="@+id/next" android:src="@drawable/next" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginRight="57dp"
+        android:layout_alignTop="@+id/playPause"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text=""
+        android:textColor="#fefefe"
+        android:id="@+id/tweet"
+        android:layout_below="@+id/playercontrols"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:divider="#bdc3c7"
+        android:dividerHeight="0.7dp"
+        android:layout_marginTop="325dp"
+        android:layout_below="@+id/next"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text=""
+        android:id="@+id/artist"
+        android:textColor="#fefefe"
+        android:layout_alignBottom="@+id/tweet"
+        android:layout_alignLeft="@+id/playPause"
+        android:layout_alignStart="@+id/playPause"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text=""
+        android:id="@+id/track"
+        android:textColor="#2c3e50"
+        android:layout_alignTop="@+id/artist"
+        android:layout_toLeftOf="@+id/next" />
+
+
+</RelativeLayout>

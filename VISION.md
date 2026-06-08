@@ -39,7 +39,6 @@ Canonical security policy and reporting:
 
 - [`SECURITY.md`](SECURITY.md)
 
-
 Twitter and Rdio credentials must stay out of source control. Callback URLs and
 tokens should not be logged or embedded in public examples as real values.
 

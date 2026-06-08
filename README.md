@@ -75,9 +75,3 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Contributing
 
 Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
-
-## Existing Project Notes
-
-Prior README summary:
-
-> musichackday-android musichackday-android ==================== Android Twitter App with RDIO. This was worked on as part of a hack for a couple of hours. You will need to create a Constants.java file:

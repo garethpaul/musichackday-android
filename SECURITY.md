@@ -37,6 +37,8 @@ Helpful reports include:
 - Real `Constants.java`, Twitter/Rdio credentials, OAuth access tokens, signing keys, local properties, generated APKs, and account data should stay out of git.
 - OAuth token and token-secret values should not be written to Android logs.
 - The app manifest keeps backup disabled for this credential-adjacent sample baseline.
+- Cached profile and album images should stay in app-private cache storage
+  rather than shared external storage.
 
 ## Mobile Privacy Notes
 

@@ -21,6 +21,7 @@ REQUIRED_FILES = [
     "build.gradle",
     "gradle/wrapper/gradle-wrapper.properties",
     "app/src/main/AndroidManifest.xml",
+    "app/src/main/java/com/twitterdev/rdio/app/FileCache.java",
     "app/libs/rdio-android-sdk.jar",
     "app/libs/signpost-commonshttp4-1.2.1.1.jar",
     "app/libs/signpost-core-1.2.1.1.jar",
@@ -112,6 +113,8 @@ def main() -> int:
         ]:
             if permission not in permissions:
                 failures.append(f"manifest must request {permission}")
+        if "android.permission.WRITE_EXTERNAL_STORAGE" in permissions:
+            failures.append("image cache must not require WRITE_EXTERNAL_STORAGE")
         application = manifest.find("application")
         if application is None:
             failures.append("manifest must include an application element")
@@ -132,6 +135,7 @@ def main() -> int:
         "app/src/main/java/com/twitterdev/rdio/app/App.java",
         "app/src/main/java/com/twitterdev/rdio/app/MainActivity.java",
         "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java",
+        "app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java",
     ]:
         text = read_text(relative_path)
         for pattern in TOKEN_LOG_PATTERNS:
@@ -141,6 +145,14 @@ def main() -> int:
     app_source = read_text("app/src/main/java/com/twitterdev/rdio/app/App.java")
     if ".enableLogging()" in app_source:
         failures.append("image loader verbose logging must stay disabled")
+
+    file_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/FileCache.java")
+    if "context.getCacheDir()" not in file_cache:
+        failures.append("FileCache must use the app-private cache directory")
+    if "Environment.getExternalStorageDirectory" in file_cache:
+        failures.append("FileCache must not use shared external storage")
+    if "url-download" in read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java"):
+        failures.append("tweet image URLs must not be logged")
 
     if not os.access(ROOT / "gradlew", os.X_OK):
         failures.append("gradlew must be executable")

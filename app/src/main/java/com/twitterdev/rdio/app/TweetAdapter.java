@@ -86,11 +86,9 @@ public class TweetAdapter extends BaseAdapter {
 
     @Override
     public View getView(int pos, View convertView, ViewGroup parent) {
-        Log.d("Working", "works here 38");
         View row = convertView;
         JSONObject crop;
         try {
-            Log.d("Pos", Integer.toString(pos));
             crop = (JSONObject) data.getJSONObject(pos);
             if (row == null) {
                 //ImageView thumb_image=(ImageView)row.findViewById(R.id.); // thumb image
@@ -113,7 +111,6 @@ public class TweetAdapter extends BaseAdapter {
 
             cropHolder.tweet.setText(crop.getString("tweet"));
             ImageView thumb = (ImageView) cropHolder.src;
-            Log.v("url-download", crop.getString("src"));
             //imageLoader.displayImage(imageUri, imageView);
             new ImageDownload(thumb).execute(crop.getString("src"));
 

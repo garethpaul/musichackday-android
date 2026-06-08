@@ -27,6 +27,8 @@ file that is intentionally not committed.
   Android artifacts ignored.
 - Removed token, token-secret, auth-event, and image-loader debug log output.
 - Disabled Android backup for the app manifest baseline.
+- Moved image cache files to app-private storage and dropped the external
+  storage permission.
 - Pinned legacy Gradle/support dependencies and moved the wrapper URL to HTTPS.
 - Added `make check` and `scripts/check-android-baseline.py` for XML, Gradle, manifest,
   credential, logging, and documentation guardrails.

@@ -74,6 +74,11 @@ public class MainActivity extends ActionBarActivity {
                 final String verifier = uri
                         .getQueryParameter(Constants.URL_TWITTER_OAUTH_VERIFIER);
 
+                if (verifier == null || twitter == null || requestToken == null) {
+                    Toast.makeText(MainActivity.this, "Twitter login was not started on this device.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
                 try {
 
                     Thread thread = new Thread(new Runnable(){

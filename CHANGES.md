@@ -6,6 +6,9 @@
 - Added a safe `Constants.java.example` template for local Twitter/Rdio values.
 - Removed OAuth event logs, OAuth access token/token secret values, and image-loader debug logging from Android log output.
 - Disabled Universal Image Loader verbose logging in the application setup.
+- Moved image cache files to app-private storage and removed the external
+  storage permission.
+- Guarded callback handling when a Twitter OAuth request is not active.
 - Pinned legacy Gradle/support-library versions, switched the wrapper URL to
   HTTPS, restored the wrapper executable bit, and disabled manifest backup.
 - Added `make check` and a static Android baseline verifier.

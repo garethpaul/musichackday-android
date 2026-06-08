@@ -213,7 +213,9 @@ public class RdioApp extends Activity implements RdioListener {
         Log.i(TAG, "Cleaning up..");
 
         // Make sure to call the cleanup method on the API object
-        rdio.cleanup();
+        if (rdio != null) {
+            rdio.cleanup();
+        }
 
         // If we allocated a player, then cleanup after it
         if (player != null) {

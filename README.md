@@ -80,4 +80,4 @@ Keep changes small and tied to the project that is already present in this repos
 
 Prior README summary:
 
-> musichackday-android <!-- README-OVERVIEW-IMAGE --> musichackday-android ==================== Android Twitter App with RDIO. This was worked on as part of a hack for a couple of hours. You will need to create a Constants.java file:
+> musichackday-android musichackday-android ==================== Android Twitter App with RDIO. This was worked on as part of a hack for a couple of hours. You will need to create a Constants.java file:

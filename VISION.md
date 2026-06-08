@@ -44,3 +44,6 @@ tokens should not be logged or embedded in public examples as real values.
 - Silent account actions
 - Broad Android migration bundled with auth behavior changes
 - Private API responses or user account data
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.

@@ -12,6 +12,8 @@ legacy dependency constraints explicit.
 
 The current focus is:
 
+Priority:
+
 - Preserve the Twitter and Rdio integration structure
 - Keep `Constants.java` local and untracked for real credentials
 - Avoid committing OAuth tokens, API keys, or private callback configuration

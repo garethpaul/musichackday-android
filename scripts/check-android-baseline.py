@@ -66,6 +66,20 @@ def main() -> int:
     ).stdout.strip()
     if tracked_constants:
         failures.append("real app/src/main/java/com/twitterdev/rdio/app/Constants.java must not be tracked")
+    tracked = subprocess.run(
+        ["git", "ls-files"],
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        check=False,
+    ).stdout.splitlines()
+    generated = [
+        path for path in tracked
+        if path.endswith((".apk", ".class", ".dex")) or "/build/" in path or path.startswith("build/")
+    ]
+    if generated:
+        failures.append("generated Android artifacts must not be tracked: " + ", ".join(generated))
 
     wrapper = read_text("gradle/wrapper/gradle-wrapper.properties")
     if "distributionUrl=https\\://services.gradle.org/distributions/gradle-1.10-all.zip" not in wrapper:

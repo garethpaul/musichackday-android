@@ -9,3 +9,4 @@
 - Pinned legacy Gradle/support-library versions, switched the wrapper URL to
   HTTPS, restored the wrapper executable bit, and disabled manifest backup.
 - Added `make check` and a static Android baseline verifier.
+- Kept signing artifacts ignored and checked that generated Android outputs are not tracked.

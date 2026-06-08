@@ -33,6 +33,10 @@ Helpful reports include:
 - Review found database, model, query, or persistence-related code; changes in those areas should receive security-focused review before merge.
 - Review found secret-like configuration names that require careful review before use; changes in those areas should receive security-focused review before merge.
 - Dependency manifests detected: build.gradle, gradle.properties. Dependency updates should preserve lockfiles when present and avoid introducing packages without a clear maintenance reason.
+- Run `make check` after changing Java sources, Gradle metadata, `AndroidManifest.xml`, `Constants.java.example`, or security documentation.
+- Real `Constants.java`, Twitter/Rdio credentials, OAuth access tokens, signing keys, local properties, generated APKs, and account data should stay out of git.
+- OAuth token and token-secret values should not be written to Android logs.
+- The app manifest keeps backup disabled for this credential-adjacent sample baseline.
 
 ## Mobile Privacy Notes
 
@@ -40,7 +44,7 @@ If this project requests device permissions such as location, camera, microphone
 
 ## Dependency and Supply Chain Security
 
-Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
+Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, signing material, generated Android packages, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
 ## Safe Research Guidelines
 

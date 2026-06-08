@@ -4,6 +4,7 @@
 from pathlib import Path
 import os
 import re
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
@@ -51,9 +52,20 @@ def main() -> int:
             failures.append(f"required file missing: {relative_path}")
 
     gitignore = read_text(".gitignore")
-    for expected in ["Constants.java", "Constants.class", "local.properties"]:
+    for expected in ["Constants.java", "Constants.class", "local.properties", "*.jks", "*.keystore", "*.p12"]:
         if expected not in gitignore:
             failures.append(f".gitignore must keep {expected} out of source control")
+
+    tracked_constants = subprocess.run(
+        ["git", "ls-files", "--", "app/src/main/java/com/twitterdev/rdio/app/Constants.java"],
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        check=False,
+    ).stdout.strip()
+    if tracked_constants:
+        failures.append("real app/src/main/java/com/twitterdev/rdio/app/Constants.java must not be tracked")
 
     wrapper = read_text("gradle/wrapper/gradle-wrapper.properties")
     if "distributionUrl=https\\://services.gradle.org/distributions/gradle-1.10-all.zip" not in wrapper:
@@ -62,6 +74,8 @@ def main() -> int:
     root_gradle = read_text("build.gradle")
     if "com.android.tools.build:gradle:0.8.3" not in root_gradle:
         failures.append("Android Gradle plugin must be pinned to 0.8.3")
+    if "https://dl.google.com/dl/android/maven2/" not in root_gradle:
+        failures.append("Google Maven repository must stay configured for legacy Android support artifacts")
     app_gradle = read_text("app/build.gradle")
     if "com.android.support:appcompat-v7:19.1.0" not in app_gradle:
         failures.append("appcompat-v7 must be pinned to 19.1.0")
@@ -114,21 +128,8 @@ def main() -> int:
     if ".enableLogging()" in app_source:
         failures.append("image loader verbose logging must stay disabled")
 
-    top_level_gradle = read_text("build.gradle")
-    app_gradle = read_text("app/build.gradle")
-    wrapper = read_text("gradle/wrapper/gradle-wrapper.properties")
-    manifest = read_text("app/src/main/AndroidManifest.xml")
-
-    if "com.android.tools.build:gradle:0.8.3" not in top_level_gradle:
-        failures.append("Android Gradle plugin version must stay pinned to 0.8.3")
-    if "appcompat-v7:19.1.0" not in app_gradle:
-        failures.append("support appcompat version must stay pinned to 19.1.0")
-    if "http\\:" in wrapper or "https\\://services.gradle.org/distributions/gradle-1.10-all.zip" not in wrapper:
-        failures.append("Gradle wrapper distribution must use HTTPS")
     if not os.access(ROOT / "gradlew", os.X_OK):
         failures.append("gradlew must be executable")
-    if 'android:allowBackup="false"' not in manifest:
-        failures.append("Android manifest must disable allowBackup")
 
     for relative_path in [
         "docs/plans/2026-06-08-credential-baseline.md",

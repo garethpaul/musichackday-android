@@ -33,6 +33,7 @@ Additional scan context:
 - Git
 - Android Studio or a compatible Android SDK
 - Gradle or the checked-in Gradle wrapper when present
+- Legacy Android SDK Platform 19 and Build Tools 19.0.3 for full builds
 
 ### Setup
 
@@ -55,7 +56,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check`
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
 
-When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
+`make check` is SDK-free and intended for quick baseline verification on modern
+machines. When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 The static check guards credential placeholders, token logging, verbose image
 loader logging, manifest backup, legacy dependency pinning, executable wrapper
 permissions, and HTTPS Gradle wrapper downloads.

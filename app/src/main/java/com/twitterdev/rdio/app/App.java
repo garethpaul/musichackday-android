@@ -19,7 +19,6 @@ public class App extends Application {
                 .memoryCache(new WeakMemoryCache())
                 .denyCacheImageMultipleSizesInMemory()
                 .threadPoolSize(5)
-                .enableLogging()
                 .build();
 
         //ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).build();

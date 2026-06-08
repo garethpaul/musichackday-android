@@ -84,7 +84,6 @@ public class MainActivity extends ActionBarActivity {
                                 // Get the access token
                                 accessToken = twitter.getOAuthAccessToken(
                                         requestToken, verifier);
-                                Log.v("accessToken", accessToken.getToken());
                                 // Shared Preferences
                                 mSharedPreferences = getApplicationContext().getSharedPreferences(
                                         "twitter4j-sample", 0);
@@ -99,7 +98,6 @@ public class MainActivity extends ActionBarActivity {
                                 e.putBoolean(Constants.PREF_KEY_TWITTER_LOGIN, true);
                                 e.commit(); // save changes
 
-                                Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
                                 Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
                                 startActivity(myIntent);
 

@@ -46,16 +46,25 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Running or Using the Project
 
 - Use Android Studio to open the project or run `./gradlew assembleDebug` when the Android SDK is configured.
+- Copy `app/src/main/java/com/twitterdev/rdio/app/Constants.java.example` to
+  `app/src/main/java/com/twitterdev/rdio/app/Constants.java` and fill in local
+  Twitter/Rdio credentials before running authentication flows.
 
 ## Testing and Verification
 
+- `make check`
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
+The static check guards credential placeholders, token logging, verbose image
+loader logging, manifest backup, legacy dependency pinning, executable wrapper
+permissions, and HTTPS Gradle wrapper downloads.
 
 ## Configuration and Secrets
 
 - Detected references to Twitter. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
+- `Constants.java` is intentionally ignored. Commit only
+  `Constants.java.example`, and keep the placeholder values obviously fake.
 
 ## Security and Privacy Notes
 
@@ -69,6 +78,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Maintenance Notes
 
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
+- Run `make check` before pushing Gradle, credential-template, manifest, logging, or documentation changes.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

@@ -20,11 +20,12 @@ Priority:
 - Preserve the Twitter and Rdio integration structure
 - Keep `Constants.java` local and untracked for real credentials
 - Avoid committing OAuth tokens, API keys, or private callback configuration
+- Keep OAuth access tokens and media-fetch debug details out of Android log output
+- Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
 
 Next priorities:
 
-- Add a safe `Constants.java.example` with clearly fake placeholders
 - Document Android SDK and Gradle requirements
 - Modernize or retire deprecated Twitter/Rdio dependencies in a dedicated pass
 - Add tests or manual verification notes for login and API flows

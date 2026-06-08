@@ -182,9 +182,7 @@ public class RdioApp extends Activity implements RdioListener {
                 RdioApp.this.startActivityForResult(myIntent, 1);
 
             } else {
-                Log.d(TAG, "Found cached credentials:");
-                Log.d(TAG, "Access token: " + accessToken);
-                Log.d(TAG, "Access token secret: " + accessTokenSecret);
+                Log.d(TAG, "Found cached credentials.");
                 rdio.prepareForPlayback();
             }
 
@@ -474,8 +472,6 @@ public class RdioApp extends Activity implements RdioListener {
     @Override
     public void onRdioAuthorised(String accessToken, String accessTokenSecret) {
         Log.i(TAG, "Application authorised, saving access token & secret.");
-        Log.d(TAG, "Access token: " + accessToken);
-        Log.d(TAG, "Access token secret: " + accessTokenSecret);
 
         SharedPreferences settings = getPreferences(MODE_PRIVATE);
         Editor editor = settings.edit();

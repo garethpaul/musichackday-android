@@ -1,36 +1,81 @@
 # musichackday-android
 
-<!-- README-OVERVIEW-IMAGE -->
-![Project overview](docs/readme-overview.svg)
+## Overview
 
-musichackday-android
-====================
+`garethpaul/musichackday-android` is an Android application or sample. Android Twitter App with RDIO
 
-Android Twitter App with RDIO. This was worked on as part of a hack for a couple of hours. 
+This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: Java (11).
 
-You will need to create a Constants.java file:
+## Repository Contents
 
+- `README.md` - project overview and local usage notes
+- `build.gradle` - Android or Gradle build configuration
+- `app` - source or example code
+- `gradle` - source or example code
+- `gradlew` - Android or Gradle build configuration
+- `SECURITY.md` - security reporting and disclosure guidance
+- `VISION.md` - project direction and maintenance guardrails
+
+Additional scan context:
+
+- Source directories: app, gradle
+- Dependency and build manifests: build.gradle, gradlew
+- Entry points or build surfaces: Gradle build files
+- Test-looking files: no obvious test files detected
+
+## Getting Started
+
+### Prerequisites
+
+- Git
+- Android Studio or a compatible Android SDK
+- Gradle or the checked-in Gradle wrapper when present
+
+### Setup
+
+```bash
+git clone https://github.com/garethpaul/musichackday-android.git
+cd musichackday-android
 ```
 
-public class Constants {
-    public static final String RDIO_APP_KEY = "2br1avdwqq7s8n27ekc8hbf6";
-    public static final String RDIO_APP_SECRET = "eYVe393gfmBQ";
-    public static final String API_KEY = "1324frfd4Dv1uI4lOttfguSg";
-    public static final String API_SECRET = "odffsff2rfe232f2ZBuveO4";
-    public static final String PREFS_NAME = "hello_world_app";
-    public static final String CALLBACKURL = "app://twitter-dev";
+The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
-    public static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
-    public static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
-    public static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLoggedIn";
+## Running or Using the Project
 
-    // Twitter oauth urls
-    public static final String URL_TWITTER_AUTH = "auth_url";
-    public static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
-    public static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
+- Use Android Studio to open the project or run `./gradlew assembleDebug` when the Android SDK is configured.
 
-}
+## Testing and Verification
 
+- `./gradlew test` or Android Studio's test runner when the SDK is configured
 
+When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
-```
+## Configuration and Secrets
+
+- Detected references to Twitter. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
+
+## Security and Privacy Notes
+
+- Review changes touching authentication or token handling; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/MainActivity.java, app/src/main/java/com/twitterdev/rdio/app/RdioApp.java, app/src/main/res/layout/activity_main.xml.
+- Review changes touching external API calls or credential-adjacent configuration; examples from the scan include app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/MainActivity.java, app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
+- Review changes touching network requests, sockets, or service endpoints; examples from the scan include app/proguard-rules.txt, app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/RdioApp.java, app/src/main/res/drawable/rdio_gradient.xml, and 6 more.
+- Review changes touching mobile permissions or privacy-sensitive device data; examples from the scan include app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/RdioApp.java, gradlew.
+- Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include app/build.gradle, app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java, app/src/main/java/com/twitterdev/rdio/app/MainActivity.java, and 6 more.
+- Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
+
+## Maintenance Notes
+
+- This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
+- See `SECURITY.md` for vulnerability reporting and safe research guidance.
+- See `VISION.md` for project direction and contribution guardrails.
+
+## Contributing
+
+Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
+
+## Existing Project Notes
+
+Prior README summary:
+
+> musichackday-android <!-- README-OVERVIEW-IMAGE --> musichackday-android ==================== Android Twitter App with RDIO. This was worked on as part of a hack for a couple of hours. You will need to create a Constants.java file:
+

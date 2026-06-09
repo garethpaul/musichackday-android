@@ -39,10 +39,14 @@ Helpful reports include:
 - The app manifest keeps backup disabled for this credential-adjacent sample baseline.
 - Cached profile and album images should stay in app-private cache storage
   rather than shared external storage.
+- Image download guards should skip invalid media URLs and recycled row image views before invoking the loader.
 
 ## Mobile Privacy Notes
 
 If this project requests device permissions such as location, camera, microphone, contacts, Bluetooth, health data, or local storage access, reports should describe the permission involved and whether sensitive data can be accessed, persisted, or transmitted unexpectedly. Please avoid testing against real third-party user data or accounts you do not control.
+
+For this app, media-loading reports should include whether image download guards
+prevent invalid URLs or recycled views from triggering crashes.
 
 ## Dependency and Supply Chain Security
 

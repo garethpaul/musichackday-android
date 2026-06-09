@@ -40,6 +40,10 @@ public class ImageDownload extends AsyncTask<String, Void, Bitmap> {
     // Actual download method, run in the task thread
     protected Bitmap doInBackground(String... params) {
         // params comes from the execute() call: params[0] is the url.
+        if (params == null || params.length == 0 || !URLUtil.isValidUrl(params[0])) {
+            url = null;
+            return null;
+        }
 
         url = params[0];
 
@@ -50,7 +54,12 @@ public class ImageDownload extends AsyncTask<String, Void, Bitmap> {
     @Override
     // Once the image is downloaded, associates it to the imageView
     protected void onPostExecute(Bitmap bitmap) {
-        il.displayImage(url, imageViewReference.get());
+        ImageView imageView = imageViewReference.get();
+        if (imageView == null || url == null) {
+            return;
+        }
+
+        il.displayImage(url, imageView);
 
     }
 

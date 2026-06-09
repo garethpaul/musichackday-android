@@ -22,12 +22,14 @@ REQUIRED_FILES = [
     "gradle/wrapper/gradle-wrapper.properties",
     "app/src/main/AndroidManifest.xml",
     "app/src/main/java/com/twitterdev/rdio/app/FileCache.java",
+    "app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java",
     "app/libs/rdio-android-sdk.jar",
     "app/libs/signpost-commonshttp4-1.2.1.1.jar",
     "app/libs/signpost-core-1.2.1.1.jar",
     "app/libs/twitter4j-core-4.0.1.jar",
     CONSTANTS_EXAMPLE,
     "docs/plans/2026-06-08-credential-baseline.md",
+    "docs/plans/2026-06-08-image-download-guards.md",
     "docs/plans/2026-06-08-musichackday-android-baseline.md",
 ]
 TOKEN_LOG_PATTERNS = [
@@ -153,12 +155,18 @@ def main() -> int:
         failures.append("FileCache must not use shared external storage")
     if "url-download" in read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java"):
         failures.append("tweet image URLs must not be logged")
+    image_download = read_text("app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java")
+    if "URLUtil.isValidUrl" not in image_download or "params.length == 0" not in image_download:
+        failures.append("ImageDownload must guard missing or invalid image URLs")
+    if "ImageView imageView = imageViewReference.get()" not in image_download or "imageView == null" not in image_download:
+        failures.append("ImageDownload must guard recycled ImageView references")
 
     if not os.access(ROOT / "gradlew", os.X_OK):
         failures.append("gradlew must be executable")
 
     for relative_path in [
         "docs/plans/2026-06-08-credential-baseline.md",
+        "docs/plans/2026-06-08-image-download-guards.md",
         "docs/plans/2026-06-08-musichackday-android-baseline.md",
     ]:
         plan = read_text(relative_path)
@@ -166,6 +174,16 @@ def main() -> int:
             failures.append(f"{relative_path} must record completed status")
         if "scripts/check-android-baseline.py" not in plan:
             failures.append(f"{relative_path} must reference the active baseline checker")
+
+    readme = read_text("README.md")
+    vision = read_text("VISION.md")
+    security = read_text("SECURITY.md")
+    changes = read_text("CHANGES.md")
+    for relative_path, text in [("README.md", readme), ("VISION.md", vision), ("SECURITY.md", security)]:
+        if "image download guard" not in text.lower():
+            failures.append(f"{relative_path} must document image download guardrails")
+    if "image download guard" not in changes.lower():
+        failures.append("CHANGES must record image download guardrails")
 
     if failures:
         for failure in failures:

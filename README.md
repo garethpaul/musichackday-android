@@ -60,13 +60,14 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 machines. When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 The static check guards credential placeholders, token logging, verbose image
 loader logging, manifest backup, legacy dependency pinning, executable wrapper
-permissions, and HTTPS Gradle wrapper downloads.
+permissions, image download guards, and HTTPS Gradle wrapper downloads.
 
 ## Configuration and Secrets
 
 - Detected references to Twitter. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
 - `Constants.java` is intentionally ignored. Commit only
   `Constants.java.example`, and keep the placeholder values obviously fake.
+- Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
 
 ## Security and Privacy Notes
 
@@ -75,6 +76,7 @@ permissions, and HTTPS Gradle wrapper downloads.
 - Review changes touching network requests, sockets, or service endpoints; examples from the scan include app/proguard-rules.txt, app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/RdioApp.java, app/src/main/res/drawable/rdio_gradient.xml, and 6 more.
 - Review changes touching mobile permissions or privacy-sensitive device data; examples from the scan include app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/RdioApp.java, gradlew.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include app/build.gradle, app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java, app/src/main/java/com/twitterdev/rdio/app/MainActivity.java, and 6 more.
+- Keep image download guards in place because media URLs and row image views are transient in scrolling lists.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
 
 ## Maintenance Notes

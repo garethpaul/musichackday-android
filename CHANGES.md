@@ -16,6 +16,8 @@
   not trigger Twitter access-token exchange.
 - Added sanitized OAuth error logging so Twitter login failures do not write
   exception messages or stack traces to Android logs.
+- Removed tracked local editor metadata and added a baseline guard so `.idea`,
+  `.vscode`, and `.iml` files stay out of source control.
 
 ## 2026-06-08
 

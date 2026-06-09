@@ -40,6 +40,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-oauth-callback-path-guard.md",
     "docs/plans/2026-06-09-oauth-callback-verifier-guard.md",
     "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
+    "docs/plans/2026-06-09-editor-metadata-ignore.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -64,7 +65,17 @@ def main() -> int:
             failures.append(f"required file missing: {relative_path}")
 
     gitignore = read_text(".gitignore")
-    for expected in ["Constants.java", "Constants.class", "local.properties", "*.jks", "*.keystore", "*.p12"]:
+    for expected in [
+        ".idea/",
+        ".vscode/",
+        "*.iml",
+        "Constants.java",
+        "Constants.class",
+        "local.properties",
+        "*.jks",
+        "*.keystore",
+        "*.p12",
+    ]:
         if expected not in gitignore:
             failures.append(f".gitignore must keep {expected} out of source control")
 
@@ -78,6 +89,16 @@ def main() -> int:
     ).stdout.strip()
     if tracked_constants:
         failures.append("real app/src/main/java/com/twitterdev/rdio/app/Constants.java must not be tracked")
+    tracked_editor_files = subprocess.run(
+        ["git", "ls-files", "--", ".idea", ".vscode", "*.iml"],
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        check=False,
+    ).stdout.splitlines()
+    if tracked_editor_files:
+        failures.append("IDE metadata must not be tracked: " + ", ".join(tracked_editor_files))
     tracked = subprocess.run(
         ["git", "ls-files"],
         cwd=ROOT,
@@ -233,6 +254,7 @@ def main() -> int:
         "docs/plans/2026-06-09-oauth-callback-path-guard.md",
         "docs/plans/2026-06-09-oauth-callback-verifier-guard.md",
         "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
+        "docs/plans/2026-06-09-editor-metadata-ignore.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -263,6 +285,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document OAuth callback verifier guardrails")
         if "sanitized oauth error logging" not in text.lower():
             failures.append(f"{relative_path} must document sanitized OAuth error logging")
+        if "local editor metadata" not in text.lower():
+            failures.append(f"{relative_path} must document local editor metadata guardrails")
         if "make lint" not in text or "make test" not in text or "make build" not in text or "make check" not in text:
             failures.append(f"{relative_path} must document standard Make gate targets")
     if "image download guard" not in changes.lower():
@@ -281,6 +305,8 @@ def main() -> int:
         failures.append("CHANGES must record OAuth callback verifier guardrails")
     if "sanitized oauth error logging" not in changes.lower():
         failures.append("CHANGES must record sanitized OAuth error logging")
+    if "local editor metadata" not in changes.lower():
+        failures.append("CHANGES must record local editor metadata guardrails")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
 

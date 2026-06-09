@@ -87,6 +87,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   before requesting Twitter access tokens.
 - Sanitized OAuth error logging keeps Twitter login failures at action-level
   messages without exception details or stack traces.
+- Local editor metadata stays ignored so Android Studio and VS Code workspace
+  files do not become part of the shared verification baseline.
 
 ## Security and Privacy Notes
 
@@ -116,6 +118,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   baseline.
 - See `docs/plans/2026-06-09-sanitized-oauth-error-logging.md` for the
   sanitized OAuth error logging guardrail.
+- See `docs/plans/2026-06-09-editor-metadata-ignore.md` for the local editor
+  metadata guardrail.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

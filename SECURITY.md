@@ -52,6 +52,8 @@ Helpful reports include:
   values before requesting Twitter access tokens.
 - Sanitized OAuth error logging should keep Twitter login failure logs at
   action-level messages without exception details or stack traces.
+- Local editor metadata should stay ignored so machine-specific SDK paths,
+  workspace state, and IDE module files are not committed.
 
 ## Mobile Privacy Notes
 

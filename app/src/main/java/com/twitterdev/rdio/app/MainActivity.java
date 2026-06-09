@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
         // capture uri
         if (!isTwitterLoggedInAlready()) {
             Uri uri = getIntent().getData();
-            if (uri != null && uri.toString().startsWith(Constants.CALLBACKURL)) {
+            if (isTwitterCallback(uri)) {
                 // oAuth verifier
                 final String verifier = uri
                         .getQueryParameter(Constants.URL_TWITTER_OAUTH_VERIFIER);
@@ -137,6 +137,20 @@ public class MainActivity extends ActionBarActivity {
     private boolean isTwitterLoggedInAlready() {
         // return twitter login status from Shared Preferences
         return mSharedPreferences.getBoolean(Constants.PREF_KEY_TWITTER_LOGIN, false);
+    }
+
+    private boolean isTwitterCallback(Uri uri) {
+        if (uri == null) {
+            return false;
+        }
+
+        Uri callbackUri = Uri.parse(Constants.CALLBACKURL);
+        String expectedScheme = callbackUri.getScheme();
+        String expectedAuthority = callbackUri.getAuthority();
+        return expectedScheme != null
+                && expectedAuthority != null
+                && expectedScheme.equals(uri.getScheme())
+                && expectedAuthority.equals(uri.getAuthority());
     }
 
 

@@ -8,6 +8,8 @@
   URLs.
 - Added memory cache entry guards for cleared soft references and null cache
   writes.
+- Added an OAuth callback URI guard so Twitter verifier exchange only resumes
+  for the configured callback scheme and authority.
 
 ## 2026-06-08
 

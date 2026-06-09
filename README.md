@@ -79,6 +79,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
 - The HTTP image URL guard should keep non-HTTP(S) media references out of image loading.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
+- The OAuth callback URI guard accepts only the configured callback scheme and
+  authority before exchanging Twitter verifier values.
 
 ## Security and Privacy Notes
 
@@ -89,6 +91,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include app/build.gradle, app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java, app/src/main/java/com/twitterdev/rdio/app/MainActivity.java, and 6 more.
 - Keep image download guards in place because media URLs and row image views are transient in scrolling lists.
 - Keep the HTTP image URL guard in place so local or non-web URI schemes are not loaded as remote media.
+- Keep the OAuth callback URI guard in place so only the configured callback
+  endpoint resumes Twitter login.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
 
 ## Maintenance Notes

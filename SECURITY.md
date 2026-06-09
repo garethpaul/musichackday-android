@@ -44,6 +44,8 @@ Helpful reports include:
 - Image download guards should skip invalid media URLs and recycled row image views before invoking the loader.
 - The HTTP image URL guard should keep local or non-web URI schemes out of image loading.
 - Memory cache entry guards should prune cleared soft references and skip null cache writes.
+- The OAuth callback URI guard should accept only the configured callback
+  scheme and authority before exchanging Twitter verifier values.
 
 ## Mobile Privacy Notes
 
@@ -51,6 +53,8 @@ If this project requests device permissions such as location, camera, microphone
 
 For this app, media-loading reports should include whether image download guards
 prevent invalid URLs, non-HTTP(S) URI schemes, or recycled views from triggering crashes.
+OAuth callback reports should include whether the OAuth callback URI guard
+rejects lookalike callback hosts or schemes before verifier exchange.
 
 ## Dependency and Supply Chain Security
 

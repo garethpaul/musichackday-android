@@ -36,6 +36,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-memory-cache-entry-guards.md",
     "docs/plans/2026-06-09-http-image-url-guard.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
+    "docs/plans/2026-06-09-oauth-callback-uri-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -163,6 +164,17 @@ def main() -> int:
     if ".enableLogging()" in app_source:
         failures.append("image loader verbose logging must stay disabled")
 
+    main_activity = read_text("app/src/main/java/com/twitterdev/rdio/app/MainActivity.java")
+    if "uri.toString().startsWith(Constants.CALLBACKURL)" in main_activity:
+        failures.append("Twitter OAuth callbacks must not use broad string-prefix matching")
+    if (
+        "private boolean isTwitterCallback(Uri uri)" not in main_activity
+        or "Uri callbackUri = Uri.parse(Constants.CALLBACKURL)" not in main_activity
+        or "expectedScheme.equals(uri.getScheme())" not in main_activity
+        or "expectedAuthority.equals(uri.getAuthority())" not in main_activity
+    ):
+        failures.append("MainActivity must validate OAuth callbacks by exact scheme and authority")
+
     file_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/FileCache.java")
     if "context.getCacheDir()" not in file_cache:
         failures.append("FileCache must use the app-private cache directory")
@@ -194,6 +206,7 @@ def main() -> int:
         "docs/plans/2026-06-09-memory-cache-entry-guards.md",
         "docs/plans/2026-06-09-http-image-url-guard.md",
         "docs/plans/2026-06-09-make-gate-aliases.md",
+        "docs/plans/2026-06-09-oauth-callback-uri-guard.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -216,6 +229,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document memory cache entry guards")
         if "http image url guard" not in text.lower():
             failures.append(f"{relative_path} must document HTTP image URL guardrails")
+        if "oauth callback uri guard" not in text.lower():
+            failures.append(f"{relative_path} must document OAuth callback URI guardrails")
         if "make lint" not in text or "make test" not in text or "make build" not in text or "make check" not in text:
             failures.append(f"{relative_path} must document standard Make gate targets")
     if "image download guard" not in changes.lower():
@@ -226,6 +241,8 @@ def main() -> int:
         failures.append("CHANGES must record memory cache entry guards")
     if "http image url guard" not in changes.lower():
         failures.append("CHANGES must record HTTP image URL guardrails")
+    if "oauth callback uri guard" not in changes.lower():
+        failures.append("CHANGES must record OAuth callback URI guardrails")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
 

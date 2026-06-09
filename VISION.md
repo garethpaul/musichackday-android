@@ -27,6 +27,7 @@ Priority:
 - Keep memory cache entry guards for cleared references and null writes
 - Keep `make lint`, `make test`, `make build`, and `make check` on the
   SDK-free static baseline
+- Keep the OAuth callback URI guard exact before exchanging verifier values
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
 
@@ -60,6 +61,8 @@ The HTTP image URL guard should keep local or non-web URI schemes out of image
 loading.
 Media cache entries should keep using SHA-256 cache filenames so URL-derived
 names remain deterministic without short Java hash collisions.
+The OAuth callback URI guard should keep Twitter verifier exchanges limited to
+the configured callback scheme and authority.
 
 ## What We Will Not Merge (For Now)
 

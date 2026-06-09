@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-09
+
+- Added memory cache entry guards for cleared soft references and null cache
+  writes.
+
 ## 2026-06-08
 
 - Added a credential hygiene baseline for the legacy Android app.

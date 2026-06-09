@@ -23,6 +23,7 @@ REQUIRED_FILES = [
     "app/src/main/AndroidManifest.xml",
     "app/src/main/java/com/twitterdev/rdio/app/FileCache.java",
     "app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java",
+    "app/src/main/java/com/twitterdev/rdio/app/MemoryCache.java",
     "app/libs/rdio-android-sdk.jar",
     "app/libs/signpost-commonshttp4-1.2.1.1.jar",
     "app/libs/signpost-core-1.2.1.1.jar",
@@ -32,6 +33,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-08-cache-filename-hashing.md",
     "docs/plans/2026-06-08-image-download-guards.md",
     "docs/plans/2026-06-08-musichackday-android-baseline.md",
+    "docs/plans/2026-06-09-memory-cache-entry-guards.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -165,6 +167,9 @@ def main() -> int:
         failures.append("ImageDownload must guard missing or invalid image URLs")
     if "ImageView imageView = imageViewReference.get()" not in image_download or "imageView == null" not in image_download:
         failures.append("ImageDownload must guard recycled ImageView references")
+    memory_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/MemoryCache.java")
+    if "cache.remove(id)" not in memory_cache or "if(id==null || bitmap==null)" not in memory_cache:
+        failures.append("MemoryCache must prune cleared references and skip null cache writes")
 
     if not os.access(ROOT / "gradlew", os.X_OK):
         failures.append("gradlew must be executable")
@@ -174,6 +179,7 @@ def main() -> int:
         "docs/plans/2026-06-08-cache-filename-hashing.md",
         "docs/plans/2026-06-08-image-download-guards.md",
         "docs/plans/2026-06-08-musichackday-android-baseline.md",
+        "docs/plans/2026-06-09-memory-cache-entry-guards.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -192,10 +198,14 @@ def main() -> int:
             failures.append(f"{relative_path} must document image download guardrails")
         if "sha-256 cache filenames" not in text.lower():
             failures.append(f"{relative_path} must document SHA-256 cache filenames")
+        if "memory cache entry guards" not in text.lower():
+            failures.append(f"{relative_path} must document memory cache entry guards")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
         failures.append("CHANGES must record SHA-256 cache filenames")
+    if "memory cache entry guards" not in changes.lower():
+        failures.append("CHANGES must record memory cache entry guards")
 
     if failures:
         for failure in failures:

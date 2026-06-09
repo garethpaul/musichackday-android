@@ -70,6 +70,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Image cache entries use SHA-256 cache filenames derived from media URLs while
   staying inside the app-private cache directory.
 - Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
+- Memory cache entry guards prune cleared soft references and skip null cache writes.
 
 ## Security and Privacy Notes
 

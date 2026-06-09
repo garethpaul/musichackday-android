@@ -42,6 +42,7 @@ Helpful reports include:
 - Cached profile and album images should use SHA-256 cache filenames rather
   than short Java hashes for URL-derived names.
 - Image download guards should skip invalid media URLs and recycled row image views before invoking the loader.
+- Memory cache entry guards should prune cleared soft references and skip null cache writes.
 
 ## Mobile Privacy Notes
 

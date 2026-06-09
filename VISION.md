@@ -23,6 +23,7 @@ Priority:
 - Keep OAuth access tokens and media-fetch debug details out of Android log output
 - Keep media cache entries on SHA-256 cache filenames in app-private storage
 - Keep image download guards around media URLs and recycled row image views
+- Keep memory cache entry guards for cleared references and null writes
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
 

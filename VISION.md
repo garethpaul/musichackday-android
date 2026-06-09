@@ -25,6 +25,8 @@ Priority:
 - Keep image download guards around media URLs and recycled row image views
 - Keep the HTTP image URL guard before loading remote media
 - Keep memory cache entry guards for cleared references and null writes
+- Keep `make lint`, `make test`, `make build`, and `make check` on the
+  SDK-free static baseline
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
 
@@ -38,6 +40,8 @@ Contribution rules:
 
 - One PR = one focused auth, API, build, or documentation change.
 - Do not commit real credentials or generated signing files.
+- Run `make lint`, `make test`, `make build`, and `make check` before pushing
+  baseline, Gradle, credential, or media-loading changes.
 - Verify behavior with local credentials for auth changes.
 - Keep the hack-day scope clear and small.
 - Preserve image download guards when changing media loading.

@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-08-musichackday-android-baseline.md",
     "docs/plans/2026-06-09-memory-cache-entry-guards.md",
     "docs/plans/2026-06-09-http-image-url-guard.md",
+    "docs/plans/2026-06-09-make-gate-aliases.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -93,6 +94,16 @@ def main() -> int:
         failures.append("Gradle wrapper distribution must use HTTPS for gradle-1.10-all.zip")
 
     root_gradle = read_text("build.gradle")
+    makefile = read_text("Makefile")
+    for target in [
+        ".PHONY: build check lint static-check test verify",
+        "check: verify",
+        "verify: static-check",
+        "lint test build: static-check",
+    ]:
+        if target not in makefile:
+            failures.append(f"Makefile must expose target contract: {target}")
+
     if "com.android.tools.build:gradle:0.8.3" not in root_gradle:
         failures.append("Android Gradle plugin must be pinned to 0.8.3")
     if "https://dl.google.com/dl/android/maven2/" not in root_gradle:
@@ -182,6 +193,7 @@ def main() -> int:
         "docs/plans/2026-06-08-musichackday-android-baseline.md",
         "docs/plans/2026-06-09-memory-cache-entry-guards.md",
         "docs/plans/2026-06-09-http-image-url-guard.md",
+        "docs/plans/2026-06-09-make-gate-aliases.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -204,6 +216,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document memory cache entry guards")
         if "http image url guard" not in text.lower():
             failures.append(f"{relative_path} must document HTTP image URL guardrails")
+        if "make lint" not in text or "make test" not in text or "make build" not in text or "make check" not in text:
+            failures.append(f"{relative_path} must document standard Make gate targets")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -212,6 +226,8 @@ def main() -> int:
         failures.append("CHANGES must record memory cache entry guards")
     if "http image url guard" not in changes.lower():
         failures.append("CHANGES must record HTTP image URL guardrails")
+    if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
+        failures.append("CHANGES must record standard Make gate aliases")
 
     if failures:
         for failure in failures:

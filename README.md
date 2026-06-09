@@ -40,6 +40,10 @@ Additional scan context:
 ```bash
 git clone https://github.com/garethpaul/musichackday-android.git
 cd musichackday-android
+make lint
+make test
+make build
+make check
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
@@ -53,11 +57,14 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `make check`
+- `make lint`, `make test`, `make build`, and `make check` run the SDK-free
+  static Android baseline.
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
 
-`make check` is SDK-free and intended for quick baseline verification on modern
-machines. When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
+The Make gates are SDK-free and intended for quick baseline verification on
+modern machines. When the required SDK or runtime is unavailable, use static
+checks and source review first, then verify on a machine that has the matching
+platform toolchain.
 The static check guards credential placeholders, token logging, verbose image
 loader logging, manifest backup, legacy dependency pinning, executable wrapper
 permissions, image download guards, and HTTPS Gradle wrapper downloads.
@@ -87,7 +94,10 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 ## Maintenance Notes
 
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
-- Run `make check` before pushing Gradle, credential-template, manifest, logging, or documentation changes.
+- Run `make lint`, `make test`, `make build`, and `make check` before pushing
+  Gradle, credential-template, manifest, logging, or documentation changes.
+- See `docs/plans/2026-06-09-make-gate-aliases.md` for the local gate alias
+  baseline.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

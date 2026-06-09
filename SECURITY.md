@@ -33,7 +33,7 @@ Helpful reports include:
 - Review found database, model, query, or persistence-related code; changes in those areas should receive security-focused review before merge.
 - Review found secret-like configuration names that require careful review before use; changes in those areas should receive security-focused review before merge.
 - Dependency manifests detected: build.gradle, gradle.properties. Dependency updates should preserve lockfiles when present and avoid introducing packages without a clear maintenance reason.
-- Run `make check` after changing Java sources, Gradle metadata, `AndroidManifest.xml`, `Constants.java.example`, or security documentation.
+- Run `make lint`, `make test`, `make build`, and `make check` after changing Java sources, Gradle metadata, `AndroidManifest.xml`, `Constants.java.example`, or security documentation.
 - Real `Constants.java`, Twitter/Rdio credentials, OAuth access tokens, signing keys, local properties, generated APKs, and account data should stay out of git.
 - OAuth token and token-secret values should not be written to Android logs.
 - The app manifest keeps backup disabled for this credential-adjacent sample baseline.

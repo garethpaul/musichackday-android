@@ -67,6 +67,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Detected references to Twitter. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
 - `Constants.java` is intentionally ignored. Commit only
   `Constants.java.example`, and keep the placeholder values obviously fake.
+- Image cache entries use SHA-256 cache filenames derived from media URLs while
+  staying inside the app-private cache directory.
 - Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
 
 ## Security and Privacy Notes

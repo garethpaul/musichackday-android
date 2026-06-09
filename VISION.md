@@ -21,6 +21,7 @@ Priority:
 - Keep `Constants.java` local and untracked for real credentials
 - Avoid committing OAuth tokens, API keys, or private callback configuration
 - Keep OAuth access tokens and media-fetch debug details out of Android log output
+- Keep media cache entries on SHA-256 cache filenames in app-private storage
 - Keep image download guards around media URLs and recycled row image views
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
@@ -49,6 +50,8 @@ Twitter and Rdio credentials must stay out of source control. Callback URLs and
 tokens should not be logged or embedded in public examples as real values.
 Image download guards should keep invalid media URLs and recycled image views
 from reaching the loader.
+Media cache entries should keep using SHA-256 cache filenames so URL-derived
+names remain deterministic without short Java hash collisions.
 
 ## What We Will Not Merge (For Now)
 

@@ -1,6 +1,10 @@
 package com.twitterdev.rdio.app;
 
+import java.io.UnsupportedEncodingException;
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import android.content.Context;
 
 public class FileCache {
@@ -14,13 +18,26 @@ public class FileCache {
     }
 
     public File getFile(String url){
-        //I identify images by hashcode. Not a perfect solution, good for the demo.
-        String filename=String.valueOf(url.hashCode());
-        //Another possible solution (thanks to grantland)
-        //String filename = URLEncoder.encode(url);
-        File f = new File(cacheDir, filename);
+        File f = new File(cacheDir, cacheFileName(url));
         return f;
 
+    }
+
+    private String cacheFileName(String url) {
+        String value = url == null ? "" : url;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = digest.digest(value.getBytes("UTF-8"));
+            StringBuilder builder = new StringBuilder(bytes.length * 2);
+            for (byte item : bytes) {
+                builder.append(String.format("%02x", item & 0xff));
+            }
+            return builder.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 unavailable", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("UTF-8 unavailable", e);
+        }
     }
 
     public void clear(){

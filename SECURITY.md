@@ -39,6 +39,8 @@ Helpful reports include:
 - The app manifest keeps backup disabled for this credential-adjacent sample baseline.
 - Cached profile and album images should stay in app-private cache storage
   rather than shared external storage.
+- Cached profile and album images should use SHA-256 cache filenames rather
+  than short Java hashes for URL-derived names.
 - Image download guards should skip invalid media URLs and recycled row image views before invoking the loader.
 
 ## Mobile Privacy Notes

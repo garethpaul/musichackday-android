@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "app/libs/twitter4j-core-4.0.1.jar",
     CONSTANTS_EXAMPLE,
     "docs/plans/2026-06-08-credential-baseline.md",
+    "docs/plans/2026-06-08-cache-filename-hashing.md",
     "docs/plans/2026-06-08-image-download-guards.md",
     "docs/plans/2026-06-08-musichackday-android-baseline.md",
 ]
@@ -153,6 +154,10 @@ def main() -> int:
         failures.append("FileCache must use the app-private cache directory")
     if "Environment.getExternalStorageDirectory" in file_cache:
         failures.append("FileCache must not use shared external storage")
+    if 'MessageDigest.getInstance("SHA-256")' not in file_cache or "cacheFileName(url)" not in file_cache:
+        failures.append("FileCache must derive image cache filenames with SHA-256")
+    if "url.hashCode()" in file_cache:
+        failures.append("FileCache must not use short Java hashCode values for URL cache filenames")
     if "url-download" in read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java"):
         failures.append("tweet image URLs must not be logged")
     image_download = read_text("app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java")
@@ -166,9 +171,12 @@ def main() -> int:
 
     for relative_path in [
         "docs/plans/2026-06-08-credential-baseline.md",
+        "docs/plans/2026-06-08-cache-filename-hashing.md",
         "docs/plans/2026-06-08-image-download-guards.md",
         "docs/plans/2026-06-08-musichackday-android-baseline.md",
     ]:
+        if not (ROOT / relative_path).is_file():
+            continue
         plan = read_text(relative_path)
         if "status: completed" not in plan:
             failures.append(f"{relative_path} must record completed status")
@@ -182,8 +190,12 @@ def main() -> int:
     for relative_path, text in [("README.md", readme), ("VISION.md", vision), ("SECURITY.md", security)]:
         if "image download guard" not in text.lower():
             failures.append(f"{relative_path} must document image download guardrails")
+        if "sha-256 cache filenames" not in text.lower():
+            failures.append(f"{relative_path} must document SHA-256 cache filenames")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
+    if "sha-256 cache filenames" not in changes.lower():
+        failures.append("CHANGES must record SHA-256 cache filenames")
 
     if failures:
         for failure in failures:

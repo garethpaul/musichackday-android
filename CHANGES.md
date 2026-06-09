@@ -8,6 +8,8 @@
 - Disabled Universal Image Loader verbose logging in the application setup.
 - Moved image cache files to app-private storage and removed the external
   storage permission.
+- Switched URL-derived image cache names to SHA-256 cache filenames to avoid
+  short Java hash collisions.
 - Added image download guards for invalid media URLs and recycled row image views.
 - Guarded callback handling when a Twitter OAuth request is not active.
 - Pinned legacy Gradle/support-library versions, switched the wrapper URL to

@@ -40,7 +40,7 @@ public class ImageDownload extends AsyncTask<String, Void, Bitmap> {
     // Actual download method, run in the task thread
     protected Bitmap doInBackground(String... params) {
         // params comes from the execute() call: params[0] is the url.
-        if (params == null || params.length == 0 || !URLUtil.isValidUrl(params[0])) {
+        if (params == null || params.length == 0 || !isHttpImageUrl(params[0])) {
             url = null;
             return null;
         }
@@ -61,6 +61,10 @@ public class ImageDownload extends AsyncTask<String, Void, Bitmap> {
 
         il.displayImage(url, imageView);
 
+    }
+
+    private boolean isHttpImageUrl(String imageUrl) {
+        return URLUtil.isHttpUrl(imageUrl) || URLUtil.isHttpsUrl(imageUrl);
     }
 
 

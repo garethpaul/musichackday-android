@@ -23,6 +23,7 @@ Priority:
 - Keep OAuth access tokens and media-fetch debug details out of Android log output
 - Keep media cache entries on SHA-256 cache filenames in app-private storage
 - Keep image download guards around media URLs and recycled row image views
+- Keep the HTTP image URL guard before loading remote media
 - Keep memory cache entry guards for cleared references and null writes
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
@@ -51,6 +52,8 @@ Twitter and Rdio credentials must stay out of source control. Callback URLs and
 tokens should not be logged or embedded in public examples as real values.
 Image download guards should keep invalid media URLs and recycled image views
 from reaching the loader.
+The HTTP image URL guard should keep local or non-web URI schemes out of image
+loading.
 Media cache entries should keep using SHA-256 cache filenames so URL-derived
 names remain deterministic without short Java hash collisions.
 

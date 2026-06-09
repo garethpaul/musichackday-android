@@ -42,6 +42,7 @@ Helpful reports include:
 - Cached profile and album images should use SHA-256 cache filenames rather
   than short Java hashes for URL-derived names.
 - Image download guards should skip invalid media URLs and recycled row image views before invoking the loader.
+- The HTTP image URL guard should keep local or non-web URI schemes out of image loading.
 - Memory cache entry guards should prune cleared soft references and skip null cache writes.
 
 ## Mobile Privacy Notes
@@ -49,7 +50,7 @@ Helpful reports include:
 If this project requests device permissions such as location, camera, microphone, contacts, Bluetooth, health data, or local storage access, reports should describe the permission involved and whether sensitive data can be accessed, persisted, or transmitted unexpectedly. Please avoid testing against real third-party user data or accounts you do not control.
 
 For this app, media-loading reports should include whether image download guards
-prevent invalid URLs or recycled views from triggering crashes.
+prevent invalid URLs, non-HTTP(S) URI schemes, or recycled views from triggering crashes.
 
 ## Dependency and Supply Chain Security
 

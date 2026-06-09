@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Added an HTTP image URL guard so image downloads only accept HTTP(S) media
+  URLs.
 - Added memory cache entry guards for cleared soft references and null cache
   writes.
 

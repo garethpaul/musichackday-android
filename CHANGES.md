@@ -14,6 +14,8 @@
   Twitter verifier exchange.
 - Added an OAuth callback verifier guard so missing or blank verifier values do
   not trigger Twitter access-token exchange.
+- Added sanitized OAuth error logging so Twitter login failures do not write
+  exception messages or stack traces to Android logs.
 
 ## 2026-06-08
 

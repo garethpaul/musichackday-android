@@ -85,6 +85,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   the configured callback before exchanging Twitter verifier values.
 - The OAuth callback verifier guard rejects missing or blank verifier values
   before requesting Twitter access tokens.
+- Sanitized OAuth error logging keeps Twitter login failures at action-level
+  messages without exception details or stack traces.
 
 ## Security and Privacy Notes
 
@@ -101,6 +103,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   not resume Twitter login.
 - Keep the OAuth callback verifier guard in place so malformed callback intents
   cannot trigger a token exchange.
+- Keep sanitized OAuth error logging in place so failed Twitter login attempts
+  do not write provider exception details to Android logs.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
 
 ## Maintenance Notes
@@ -110,6 +114,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   Gradle, credential-template, manifest, logging, or documentation changes.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the local gate alias
   baseline.
+- See `docs/plans/2026-06-09-sanitized-oauth-error-logging.md` for the
+  sanitized OAuth error logging guardrail.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

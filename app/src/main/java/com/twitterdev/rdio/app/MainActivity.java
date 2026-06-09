@@ -108,7 +108,7 @@ public class MainActivity extends ActionBarActivity {
 
                                 // Hide login button
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                logTwitterLoginFailure("Access token exchange");
                             }
                         }
                     });
@@ -117,9 +117,7 @@ public class MainActivity extends ActionBarActivity {
 
 
                 } catch (Exception e) {
-                    // Check log for login errors
-                    Log.e("Twitter Login Error", "> " + e.getMessage());
-                    e.printStackTrace();
+                    logTwitterLoginFailure("OAuth callback handling");
                 }
             }
         } else {
@@ -192,7 +190,7 @@ public class MainActivity extends ActionBarActivity {
                                 .parse(requestToken.getAuthenticationURL())));
 
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logTwitterLoginFailure("Request token creation");
                     }
                 }
             });
@@ -201,6 +199,10 @@ public class MainActivity extends ActionBarActivity {
             Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
             startActivity(myIntent);
         }
+    }
+
+    private void logTwitterLoginFailure(String action) {
+        Log.e("Twitter Login Error", action + " failed");
     }
 
 }

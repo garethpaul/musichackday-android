@@ -12,6 +12,8 @@
   for the configured callback scheme and authority.
 - Added an OAuth callback path guard so lookalike callback paths do not resume
   Twitter verifier exchange.
+- Added an OAuth callback verifier guard so missing or blank verifier values do
+  not trigger Twitter access-token exchange.
 
 ## 2026-06-08
 

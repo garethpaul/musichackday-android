@@ -48,6 +48,8 @@ Helpful reports include:
   scheme and authority before exchanging Twitter verifier values.
 - The OAuth callback path guard should accept only the configured callback path
   before exchanging Twitter verifier values.
+- The OAuth callback verifier guard should reject missing or blank verifier
+  values before requesting Twitter access tokens.
 
 ## Mobile Privacy Notes
 
@@ -59,6 +61,8 @@ OAuth callback reports should include whether the OAuth callback URI guard
 rejects lookalike callback hosts or schemes before verifier exchange.
 OAuth callback reports should also include whether the OAuth callback path
 guard rejects lookalike callback paths before verifier exchange.
+OAuth callback reports should include whether the OAuth callback verifier guard
+rejects missing or blank verifier values before token exchange.
 
 ## Dependency and Supply Chain Security
 

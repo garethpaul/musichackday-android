@@ -38,6 +38,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-09-oauth-callback-uri-guard.md",
     "docs/plans/2026-06-09-oauth-callback-path-guard.md",
+    "docs/plans/2026-06-09-oauth-callback-verifier-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -182,6 +183,12 @@ def main() -> int:
         or "expectedPath.equals(actualPath)" not in main_activity
     ):
         failures.append("MainActivity must validate OAuth callbacks by exact normalized path")
+    if (
+        "private boolean hasOAuthVerifier(String verifier)" not in main_activity
+        or "verifier.trim().length() > 0" not in main_activity
+        or "!hasOAuthVerifier(verifier)" not in main_activity
+    ):
+        failures.append("MainActivity must reject blank OAuth verifier values before token exchange")
 
     file_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/FileCache.java")
     if "context.getCacheDir()" not in file_cache:
@@ -216,6 +223,7 @@ def main() -> int:
         "docs/plans/2026-06-09-make-gate-aliases.md",
         "docs/plans/2026-06-09-oauth-callback-uri-guard.md",
         "docs/plans/2026-06-09-oauth-callback-path-guard.md",
+        "docs/plans/2026-06-09-oauth-callback-verifier-guard.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -242,6 +250,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document OAuth callback URI guardrails")
         if "oauth callback path guard" not in text.lower():
             failures.append(f"{relative_path} must document OAuth callback path guardrails")
+        if "oauth callback verifier guard" not in text.lower():
+            failures.append(f"{relative_path} must document OAuth callback verifier guardrails")
         if "make lint" not in text or "make test" not in text or "make build" not in text or "make check" not in text:
             failures.append(f"{relative_path} must document standard Make gate targets")
     if "image download guard" not in changes.lower():
@@ -256,6 +266,8 @@ def main() -> int:
         failures.append("CHANGES must record OAuth callback URI guardrails")
     if "oauth callback path guard" not in changes.lower():
         failures.append("CHANGES must record OAuth callback path guardrails")
+    if "oauth callback verifier guard" not in changes.lower():
+        failures.append("CHANGES must record OAuth callback verifier guardrails")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
 

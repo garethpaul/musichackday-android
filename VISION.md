@@ -29,6 +29,7 @@ Priority:
   SDK-free static baseline
 - Keep the OAuth callback URI guard exact before exchanging verifier values
 - Keep the OAuth callback path guard exact before exchanging verifier values
+- Keep the OAuth callback verifier guard strict before exchanging access tokens
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
 
@@ -66,6 +67,8 @@ The OAuth callback URI guard should keep Twitter verifier exchanges limited to
 the configured callback scheme and authority.
 The OAuth callback path guard should keep Twitter verifier exchanges limited to
 the configured callback path.
+The OAuth callback verifier guard should reject missing or blank verifier values
+before exchanging for access tokens.
 
 ## What We Will Not Merge (For Now)
 

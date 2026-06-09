@@ -83,6 +83,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   authority before exchanging Twitter verifier values.
 - The OAuth callback path guard rejects callback URLs whose path differs from
   the configured callback before exchanging Twitter verifier values.
+- The OAuth callback verifier guard rejects missing or blank verifier values
+  before requesting Twitter access tokens.
 
 ## Security and Privacy Notes
 
@@ -97,6 +99,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   endpoint resumes Twitter login.
 - Keep the OAuth callback path guard in place so lookalike callback paths do
   not resume Twitter login.
+- Keep the OAuth callback verifier guard in place so malformed callback intents
+  cannot trigger a token exchange.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
 
 ## Maintenance Notes

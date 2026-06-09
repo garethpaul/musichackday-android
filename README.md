@@ -81,6 +81,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard accepts only the configured callback scheme and
   authority before exchanging Twitter verifier values.
+- The OAuth callback path guard rejects callback URLs whose path differs from
+  the configured callback before exchanging Twitter verifier values.
 
 ## Security and Privacy Notes
 
@@ -93,6 +95,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep the HTTP image URL guard in place so local or non-web URI schemes are not loaded as remote media.
 - Keep the OAuth callback URI guard in place so only the configured callback
   endpoint resumes Twitter login.
+- Keep the OAuth callback path guard in place so lookalike callback paths do
+  not resume Twitter login.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
 
 ## Maintenance Notes

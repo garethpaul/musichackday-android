@@ -147,10 +147,18 @@ public class MainActivity extends ActionBarActivity {
         Uri callbackUri = Uri.parse(Constants.CALLBACKURL);
         String expectedScheme = callbackUri.getScheme();
         String expectedAuthority = callbackUri.getAuthority();
+        String expectedPath = normalizedPath(callbackUri);
+        String actualPath = normalizedPath(uri);
         return expectedScheme != null
                 && expectedAuthority != null
                 && expectedScheme.equals(uri.getScheme())
-                && expectedAuthority.equals(uri.getAuthority());
+                && expectedAuthority.equals(uri.getAuthority())
+                && expectedPath.equals(actualPath);
+    }
+
+    private String normalizedPath(Uri uri) {
+        String path = uri.getPath();
+        return path == null ? "" : path;
     }
 
 

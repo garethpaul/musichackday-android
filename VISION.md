@@ -28,6 +28,7 @@ Priority:
 - Keep `make lint`, `make test`, `make build`, and `make check` on the
   SDK-free static baseline
 - Keep the OAuth callback URI guard exact before exchanging verifier values
+- Keep the OAuth callback path guard exact before exchanging verifier values
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
 
@@ -63,6 +64,8 @@ Media cache entries should keep using SHA-256 cache filenames so URL-derived
 names remain deterministic without short Java hash collisions.
 The OAuth callback URI guard should keep Twitter verifier exchanges limited to
 the configured callback scheme and authority.
+The OAuth callback path guard should keep Twitter verifier exchanges limited to
+the configured callback path.
 
 ## What We Will Not Merge (For Now)
 

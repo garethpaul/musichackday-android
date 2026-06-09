@@ -10,6 +10,8 @@
   writes.
 - Added an OAuth callback URI guard so Twitter verifier exchange only resumes
   for the configured callback scheme and authority.
+- Added an OAuth callback path guard so lookalike callback paths do not resume
+  Twitter verifier exchange.
 
 ## 2026-06-08
 

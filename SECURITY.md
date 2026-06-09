@@ -46,6 +46,8 @@ Helpful reports include:
 - Memory cache entry guards should prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard should accept only the configured callback
   scheme and authority before exchanging Twitter verifier values.
+- The OAuth callback path guard should accept only the configured callback path
+  before exchanging Twitter verifier values.
 
 ## Mobile Privacy Notes
 
@@ -55,6 +57,8 @@ For this app, media-loading reports should include whether image download guards
 prevent invalid URLs, non-HTTP(S) URI schemes, or recycled views from triggering crashes.
 OAuth callback reports should include whether the OAuth callback URI guard
 rejects lookalike callback hosts or schemes before verifier exchange.
+OAuth callback reports should also include whether the OAuth callback path
+guard rejects lookalike callback paths before verifier exchange.
 
 ## Dependency and Supply Chain Security
 

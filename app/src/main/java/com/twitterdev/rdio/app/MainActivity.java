@@ -73,8 +73,13 @@ public class MainActivity extends ActionBarActivity {
                 // oAuth verifier
                 final String verifier = uri
                         .getQueryParameter(Constants.URL_TWITTER_OAUTH_VERIFIER);
+                final String callbackToken = uri
+                        .getQueryParameter(Constants.URL_TWITTER_OAUTH_TOKEN);
 
-                if (!hasOAuthVerifier(verifier) || twitter == null || requestToken == null) {
+                if (!hasOAuthVerifier(verifier)
+                        || twitter == null
+                        || requestToken == null
+                        || !matchesRequestToken(callbackToken, requestToken)) {
                     Toast.makeText(MainActivity.this, "Twitter login was not started on this device.", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -161,6 +166,15 @@ public class MainActivity extends ActionBarActivity {
 
     private boolean hasOAuthVerifier(String verifier) {
         return verifier != null && verifier.trim().length() > 0;
+    }
+
+    private boolean matchesRequestToken(String callbackToken, RequestToken activeRequestToken) {
+        if (callbackToken == null || activeRequestToken == null) {
+            return false;
+        }
+
+        String expectedToken = activeRequestToken.getToken();
+        return expectedToken != null && expectedToken.equals(callbackToken);
     }
 
 

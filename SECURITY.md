@@ -50,6 +50,8 @@ Helpful reports include:
   before exchanging Twitter verifier values.
 - The OAuth callback verifier guard should reject missing or blank verifier
   values before requesting Twitter access tokens.
+- The OAuth callback token guard should require callback tokens to match the
+  active request token before requesting Twitter access tokens.
 - Sanitized OAuth error logging should keep Twitter login failure logs at
   action-level messages without exception details or stack traces.
 - Local editor metadata should stay ignored so machine-specific SDK paths,
@@ -67,6 +69,8 @@ OAuth callback reports should also include whether the OAuth callback path
 guard rejects lookalike callback paths before verifier exchange.
 OAuth callback reports should include whether the OAuth callback verifier guard
 rejects missing or blank verifier values before token exchange.
+OAuth callback reports should include whether the OAuth callback token guard
+rejects callbacks whose token does not match the active request token.
 OAuth logging reports should include whether sanitized OAuth error logging can
 be bypassed to write provider exception details or stack traces.
 

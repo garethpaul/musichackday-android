@@ -41,6 +41,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-oauth-callback-verifier-guard.md",
     "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
     "docs/plans/2026-06-09-editor-metadata-ignore.md",
+    "docs/plans/2026-06-10-oauth-callback-token-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -166,7 +167,7 @@ def main() -> int:
         failures.append(f"manifest XML must parse: {exc}")
 
     constants = read_text(CONSTANTS_EXAMPLE)
-    for expected in ["YOUR_TWITTER_API_KEY", "YOUR_RDIO_APP_KEY", "app://twitter-dev"]:
+    for expected in ["YOUR_TWITTER_API_KEY", "YOUR_RDIO_APP_KEY", "app://twitter-dev", "URL_TWITTER_OAUTH_TOKEN"]:
         if expected not in constants:
             failures.append(f"{CONSTANTS_EXAMPLE} must include placeholder {expected}")
     for name, value in re.findall(r"public static final String\s+(\w+)\s*=\s*\"([^\"]*)\"", constants):
@@ -212,6 +213,14 @@ def main() -> int:
     ):
         failures.append("MainActivity must reject blank OAuth verifier values before token exchange")
     if (
+        "final String callbackToken = uri" not in main_activity
+        or "Constants.URL_TWITTER_OAUTH_TOKEN" not in main_activity
+        or "private boolean matchesRequestToken(String callbackToken, RequestToken activeRequestToken)" not in main_activity
+        or "!matchesRequestToken(callbackToken, requestToken)" not in main_activity
+        or "activeRequestToken.getToken()" not in main_activity
+    ):
+        failures.append("MainActivity must bind OAuth callbacks to the active request token")
+    if (
         "private void logTwitterLoginFailure(String action)" not in main_activity
         or 'Log.e("Twitter Login Error", action + " failed")' not in main_activity
         or "e.printStackTrace()" in main_activity
@@ -255,6 +264,7 @@ def main() -> int:
         "docs/plans/2026-06-09-oauth-callback-verifier-guard.md",
         "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
         "docs/plans/2026-06-09-editor-metadata-ignore.md",
+        "docs/plans/2026-06-10-oauth-callback-token-guard.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -283,6 +293,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document OAuth callback path guardrails")
         if "oauth callback verifier guard" not in text.lower():
             failures.append(f"{relative_path} must document OAuth callback verifier guardrails")
+        if "oauth callback token guard" not in text.lower():
+            failures.append(f"{relative_path} must document OAuth callback token guardrails")
         if "sanitized oauth error logging" not in text.lower():
             failures.append(f"{relative_path} must document sanitized OAuth error logging")
         if "local editor metadata" not in text.lower():
@@ -303,6 +315,8 @@ def main() -> int:
         failures.append("CHANGES must record OAuth callback path guardrails")
     if "oauth callback verifier guard" not in changes.lower():
         failures.append("CHANGES must record OAuth callback verifier guardrails")
+    if "oauth callback token guard" not in changes.lower():
+        failures.append("CHANGES must record OAuth callback token guardrails")
     if "sanitized oauth error logging" not in changes.lower():
         failures.append("CHANGES must record sanitized OAuth error logging")
     if "local editor metadata" not in changes.lower():

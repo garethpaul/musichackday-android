@@ -30,6 +30,7 @@ Priority:
 - Keep the OAuth callback URI guard exact before exchanging verifier values
 - Keep the OAuth callback path guard exact before exchanging verifier values
 - Keep the OAuth callback verifier guard strict before exchanging access tokens
+- Keep the OAuth callback token guard bound to the active request token
 - Keep sanitized OAuth error logging for Twitter login failures
 - Keep local editor metadata out of the shared Android project baseline
 - Keep legacy build coordinates pinned for reproducible archaeology
@@ -71,6 +72,8 @@ The OAuth callback path guard should keep Twitter verifier exchanges limited to
 the configured callback path.
 The OAuth callback verifier guard should reject missing or blank verifier values
 before exchanging for access tokens.
+The OAuth callback token guard should keep verifier exchange bound to the
+request token created by the local login attempt.
 Sanitized OAuth error logging should keep Twitter login failures out of
 exception-detail and stack-trace logs.
 Local editor metadata should stay ignored so IDE workspace choices do not

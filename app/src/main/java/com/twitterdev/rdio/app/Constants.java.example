@@ -15,6 +15,7 @@ public final class Constants {
     public static final String appSecret = "YOUR_RDIO_APP_SECRET";
 
     public static final String CALLBACKURL = "app://twitter-dev";
+    public static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
     public static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
 
     public static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";

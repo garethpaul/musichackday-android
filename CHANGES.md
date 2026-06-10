@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-10
+
+- Added an OAuth callback token guard so callback tokens must match the active
+  request token before Twitter verifier exchange.
+
 ## 2026-06-09
 
 - Added `make lint`, `make test`, and `make build` aliases so the standard

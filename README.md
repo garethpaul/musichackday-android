@@ -59,6 +59,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make lint`, `make test`, `make build`, and `make check` run the SDK-free
   static Android baseline.
+- Pinned `ubuntu-24.04` GitHub Actions runs the same baseline on Python 3.12
+  without credentials, OAuth exchange, media downloads, Android SDK setup, or
+  execution of the obsolete Gradle build.
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
 
 The Make gates are SDK-free and intended for quick baseline verification on

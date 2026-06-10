@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Added pinned, read-only Linux hosted validation for the SDK-free Android
+  baseline without executing the obsolete Gradle toolchain.
 - Added an OAuth callback token guard so callback tokens must match the active
   request token before Twitter verifier exchange.
 

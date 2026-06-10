@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 CONSTANTS_EXAMPLE = "app/src/main/java/com/twitterdev/rdio/app/Constants.java.example"
 REQUIRED_FILES = [
+    ".github/workflows/check.yml",
     "README.md",
     "SECURITY.md",
     "VISION.md",
@@ -42,6 +43,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
     "docs/plans/2026-06-09-editor-metadata-ignore.md",
     "docs/plans/2026-06-10-oauth-callback-token-guard.md",
+    "docs/plans/2026-06-10-hosted-static-validation.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -265,6 +267,7 @@ def main() -> int:
         "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
         "docs/plans/2026-06-09-editor-metadata-ignore.md",
         "docs/plans/2026-06-10-oauth-callback-token-guard.md",
+        "docs/plans/2026-06-10-hosted-static-validation.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -273,6 +276,20 @@ def main() -> int:
             failures.append(f"{relative_path} must record completed status")
         if "scripts/check-android-baseline.py" not in plan:
             failures.append(f"{relative_path} must reference the active baseline checker")
+
+    workflow = read_text(".github/workflows/check.yml")
+    for expected in [
+        "permissions:\n  contents: read",
+        "cancel-in-progress: true",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        'python-version: "3.12"',
+        "run: make check",
+    ]:
+        if expected not in workflow:
+            failures.append(f"Check workflow must keep {expected}")
 
     readme = read_text("README.md")
     vision = read_text("VISION.md")

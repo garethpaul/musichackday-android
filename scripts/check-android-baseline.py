@@ -44,6 +44,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-editor-metadata-ignore.md",
     "docs/plans/2026-06-10-oauth-callback-token-guard.md",
     "docs/plans/2026-06-10-hosted-static-validation.md",
+    "docs/plans/2026-06-10-https-profile-images.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -242,8 +243,11 @@ def main() -> int:
     if "url-download" in read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java"):
         failures.append("tweet image URLs must not be logged")
     image_download = read_text("app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java")
-    if "isHttpImageUrl" not in image_download or "URLUtil.isHttpUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "params.length == 0" not in image_download:
-        failures.append("ImageDownload must guard missing and non-HTTP(S) image URLs")
+    if "isHttpsImageUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "URLUtil.isHttpUrl" in image_download or "params.length == 0" not in image_download:
+        failures.append("ImageDownload must guard missing URLs and accept only HTTPS images")
+    rdio_app = read_text("app/src/main/java/com/twitterdev/rdio/app/RdioApp.java")
+    if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
+        failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
     if "ImageView imageView = imageViewReference.get()" not in image_download or "imageView == null" not in image_download:
         failures.append("ImageDownload must guard recycled ImageView references")
     memory_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/MemoryCache.java")
@@ -268,6 +272,7 @@ def main() -> int:
         "docs/plans/2026-06-09-editor-metadata-ignore.md",
         "docs/plans/2026-06-10-oauth-callback-token-guard.md",
         "docs/plans/2026-06-10-hosted-static-validation.md",
+        "docs/plans/2026-06-10-https-profile-images.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -304,6 +309,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document memory cache entry guards")
         if "http image url guard" not in text.lower():
             failures.append(f"{relative_path} must document HTTP image URL guardrails")
+        if "https profile image guard" not in text.lower():
+            failures.append(f"{relative_path} must document HTTPS profile image guardrails")
         if "oauth callback uri guard" not in text.lower():
             failures.append(f"{relative_path} must document OAuth callback URI guardrails")
         if "oauth callback path guard" not in text.lower():
@@ -326,6 +333,8 @@ def main() -> int:
         failures.append("CHANGES must record memory cache entry guards")
     if "http image url guard" not in changes.lower():
         failures.append("CHANGES must record HTTP image URL guardrails")
+    if "https profile image guard" not in changes.lower():
+        failures.append("CHANGES must record HTTPS profile image guardrails")
     if "oauth callback uri guard" not in changes.lower():
         failures.append("CHANGES must record OAuth callback URI guardrails")
     if "oauth callback path guard" not in changes.lower():

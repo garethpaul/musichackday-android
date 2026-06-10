@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Added an HTTPS profile image guard so Twitter media uses the encrypted URL
+  field and cleartext HTTP is rejected by the image loader.
 - Added pinned, read-only Linux hosted validation for the SDK-free Android
   baseline without executing the obsolete Gradle toolchain.
 - Added an OAuth callback token guard so callback tokens must match the active

@@ -24,6 +24,7 @@ Priority:
 - Keep media cache entries on SHA-256 cache filenames in app-private storage
 - Keep image download guards around media URLs and recycled row image views
 - Keep the HTTP image URL guard before loading remote media
+- Keep the HTTPS profile image guard at both Twitter URL selection and image loading
 - Keep memory cache entry guards for cleared references and null writes
 - Keep `make lint`, `make test`, `make build`, and `make check` on the
   SDK-free static baseline
@@ -65,6 +66,8 @@ Image download guards should keep invalid media URLs and recycled image views
 from reaching the loader.
 The HTTP image URL guard should keep local or non-web URI schemes out of image
 loading.
+The HTTPS profile image guard should keep profile media on encrypted transport
+from Twitter URL selection through the loader boundary.
 Media cache entries should keep using SHA-256 cache filenames so URL-derived
 names remain deterministic without short Java hash collisions.
 The OAuth callback URI guard should keep Twitter verifier exchanges limited to

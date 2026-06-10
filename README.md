@@ -81,6 +81,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   staying inside the app-private cache directory.
 - Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
 - The HTTP image URL guard should keep non-HTTP(S) media references out of image loading.
+- The HTTPS profile image guard selects Twitter's encrypted profile-image URL
+  and rejects cleartext HTTP again at the loader boundary.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard accepts only the configured callback scheme and
   authority before exchanging Twitter verifier values.
@@ -104,6 +106,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include app/build.gradle, app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java, app/src/main/java/com/twitterdev/rdio/app/MainActivity.java, and 6 more.
 - Keep image download guards in place because media URLs and row image views are transient in scrolling lists.
 - Keep the HTTP image URL guard in place so local or non-web URI schemes are not loaded as remote media.
+- Keep the HTTPS profile image guard in place so profile media cannot fall back
+  to cleartext HTTP transport.
 - Keep the OAuth callback URI guard in place so only the configured callback
   endpoint resumes Twitter login.
 - Keep the OAuth callback path guard in place so lookalike callback paths do

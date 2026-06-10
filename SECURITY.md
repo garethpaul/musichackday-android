@@ -46,6 +46,8 @@ Helpful reports include:
   than short Java hashes for URL-derived names.
 - Image download guards should skip invalid media URLs and recycled row image views before invoking the loader.
 - The HTTP image URL guard should keep local or non-web URI schemes out of image loading.
+- The HTTPS profile image guard should select Twitter's HTTPS media field and
+  reject cleartext HTTP at the loader boundary.
 - Memory cache entry guards should prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard should accept only the configured callback
   scheme and authority before exchanging Twitter verifier values.

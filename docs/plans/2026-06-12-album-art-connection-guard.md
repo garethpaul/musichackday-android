@@ -1,6 +1,6 @@
 # Album Art Connection Guard
 
-status: planned
+status: completed
 
 ## Context
 
@@ -42,14 +42,19 @@ document the SDK-free verification boundary.
 
 ## Verification
 
+Completed locally on 2026-06-12:
+
 - `python3 -m py_compile scripts/check-android-baseline.py`
 - `make lint`
 - `make test`
 - `make build`
 - `make check`
-- hostile mutations removing HTTPS, timeout, cleanup, or sanitized logging guards
+- hostile mutations removing HTTPS, timeout, cleanup, or sanitized logging
+  guards were each rejected by the static contract
 - `git diff --check`
-- hosted push and pull-request checks
+
+The local gate is SDK-free and does not execute the obsolete Android toolchain.
+Hosted push and pull-request checks will be recorded after the branch is pushed.
 
 ## Boundaries
 

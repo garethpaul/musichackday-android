@@ -29,7 +29,8 @@ Priority:
 - Keep memory cache entry guards for cleared references and null writes
 - Keep `make lint`, `make test`, `make build`, and `make check` on the
   SDK-free static baseline
-- Keep that SDK-free baseline pinned and read-only in hosted Linux validation
+- Keep that SDK-free baseline pinned, read-only, and credential-free in hosted
+  Linux validation
 - Keep the OAuth callback URI guard exact before exchanging verifier values
 - Keep the OAuth callback path guard exact before exchanging verifier values
 - Keep the OAuth callback verifier guard strict before exchanging access tokens

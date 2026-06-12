@@ -48,6 +48,8 @@ Helpful reports include:
 - The HTTP image URL guard should keep local or non-web URI schemes out of image loading.
 - The HTTPS profile image guard should select Twitter's HTTPS media field and
   reject cleartext HTTP at the loader boundary.
+- The album art connection guard should require HTTPS, bounded connect/read
+  timeouts, generic errors, and deterministic stream/connection cleanup.
 - Memory cache entry guards should prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard should accept only the configured callback
   scheme and authority before exchanging Twitter verifier values.

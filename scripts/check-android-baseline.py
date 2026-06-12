@@ -45,6 +45,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-10-oauth-callback-token-guard.md",
     "docs/plans/2026-06-10-hosted-static-validation.md",
     "docs/plans/2026-06-10-https-profile-images.md",
+    "docs/plans/2026-06-12-album-art-connection-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -248,6 +249,18 @@ def main() -> int:
     rdio_app = read_text("app/src/main/java/com/twitterdev/rdio/app/RdioApp.java")
     if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
         failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
+    artwork_task = rdio_app.split("// Fetch album art in the background", 1)[1].split("artworkTask.execute(track)", 1)[0]
+    if (
+        "URLUtil.isHttpsUrl(artworkUrl)" not in artwork_task
+        or "HttpURLConnection connection" not in artwork_task
+        or "connection.setConnectTimeout(10000)" not in artwork_task
+        or "connection.setReadTimeout(10000)" not in artwork_task
+    ):
+        failures.append("album art downloads must require HTTPS and bounded connection timeouts")
+    if "finally {" not in artwork_task or "bufferedInputStream.close()" not in artwork_task or "connection.disconnect()" not in artwork_task:
+        failures.append("album art downloads must close streams and disconnect in all paths")
+    if "Downloading album art:" in artwork_task or 'Log.e(TAG, "Album art download failed", e)' in artwork_task:
+        failures.append("album art failure logging must not include media URLs or exception details")
     if "ImageView imageView = imageViewReference.get()" not in image_download or "imageView == null" not in image_download:
         failures.append("ImageDownload must guard recycled ImageView references")
     memory_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/MemoryCache.java")
@@ -273,6 +286,7 @@ def main() -> int:
         "docs/plans/2026-06-10-oauth-callback-token-guard.md",
         "docs/plans/2026-06-10-hosted-static-validation.md",
         "docs/plans/2026-06-10-https-profile-images.md",
+        "docs/plans/2026-06-12-album-art-connection-guard.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -325,6 +339,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document local editor metadata guardrails")
         if "make lint" not in text or "make test" not in text or "make build" not in text or "make check" not in text:
             failures.append(f"{relative_path} must document standard Make gate targets")
+        if "album art connection guard" not in text.lower():
+            failures.append(f"{relative_path} must document the album art connection guard")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -335,6 +351,8 @@ def main() -> int:
         failures.append("CHANGES must record HTTP image URL guardrails")
     if "https profile image guard" not in changes.lower():
         failures.append("CHANGES must record HTTPS profile image guardrails")
+    if "album art connection guard" not in changes.lower():
+        failures.append("CHANGES must record album art connection guardrails")
     if "oauth callback uri guard" not in changes.lower():
         failures.append("CHANGES must record OAuth callback URI guardrails")
     if "oauth callback path guard" not in changes.lower():

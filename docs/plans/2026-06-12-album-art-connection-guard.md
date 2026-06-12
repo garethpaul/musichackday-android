@@ -54,7 +54,12 @@ Completed locally on 2026-06-12:
 - `git diff --check`
 
 The local gate is SDK-free and does not execute the obsolete Android toolchain.
-Hosted push and pull-request checks will be recorded after the branch is pushed.
+
+Completed on GitHub Actions for implementation head
+`07bc050493d0c703f6ded9c06f09d187b16b52f7`:
+
+- push run `27397446444`: success
+- pull-request run `27397447181`: success
 
 ## Boundaries
 

@@ -2,6 +2,7 @@
 
 ## 2026-06-10
 
+- Added GitHub Actions CI that runs the SDK-free `make check` baseline.
 - Added an OAuth callback token guard so callback tokens must match the active
   request token before Twitter verifier exchange.
 

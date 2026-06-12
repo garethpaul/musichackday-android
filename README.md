@@ -12,6 +12,7 @@ This README is based on the checked-in source, manifests, scripts, and repositor
 ## Repository Contents
 
 - `README.md` - project overview and local usage notes
+- `.github/workflows/check.yml` - CI baseline that runs the SDK-free Make gate
 - `build.gradle` - Android or Gradle build configuration
 - `app` - source or example code
 - `gradle` - source or example code
@@ -68,6 +69,8 @@ platform toolchain.
 The static check guards credential placeholders, token logging, verbose image
 loader logging, manifest backup, legacy dependency pinning, executable wrapper
 permissions, image download guards, and HTTPS Gradle wrapper downloads.
+GitHub Actions runs the same SDK-free `make check` gate through
+`.github/workflows/check.yml` on pushes and pull requests.
 
 ## Configuration and Secrets
 
@@ -124,6 +127,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   sanitized OAuth error logging guardrail.
 - See `docs/plans/2026-06-09-editor-metadata-ignore.md` for the local editor
   metadata guardrail.
+- See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight CI baseline.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

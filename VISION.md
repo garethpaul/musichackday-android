@@ -33,6 +33,7 @@ Priority:
 - Keep the OAuth callback token guard bound to the active request token
 - Keep sanitized OAuth error logging for Twitter login failures
 - Keep local editor metadata out of the shared Android project baseline
+- Keep GitHub Actions running the SDK-free `make check` baseline
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
 

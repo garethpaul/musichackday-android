@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 CONSTANTS_EXAMPLE = "app/src/main/java/com/twitterdev/rdio/app/Constants.java.example"
 REQUIRED_FILES = [
+    ".github/workflows/check.yml",
     "README.md",
     "SECURITY.md",
     "VISION.md",
@@ -42,6 +43,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
     "docs/plans/2026-06-09-editor-metadata-ignore.md",
     "docs/plans/2026-06-10-oauth-callback-token-guard.md",
+    "docs/plans/2026-06-10-ci-baseline.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -121,6 +123,7 @@ def main() -> int:
 
     root_gradle = read_text("build.gradle")
     makefile = read_text("Makefile")
+    workflow = read_text(".github/workflows/check.yml")
     for target in [
         ".PHONY: build check lint static-check test verify",
         "check: verify",
@@ -132,6 +135,8 @@ def main() -> int:
 
     if "com.android.tools.build:gradle:0.8.3" not in root_gradle:
         failures.append("Android Gradle plugin must be pinned to 0.8.3")
+    if "actions/checkout@v4" not in workflow or "actions/setup-python@v5" not in workflow or "make check" not in workflow:
+        failures.append("GitHub Actions must run the SDK-free make check baseline")
     if "https://dl.google.com/dl/android/maven2/" not in root_gradle:
         failures.append("Google Maven repository must stay configured for legacy Android support artifacts")
     app_gradle = read_text("app/build.gradle")
@@ -265,6 +270,7 @@ def main() -> int:
         "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
         "docs/plans/2026-06-09-editor-metadata-ignore.md",
         "docs/plans/2026-06-10-oauth-callback-token-guard.md",
+        "docs/plans/2026-06-10-ci-baseline.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -278,6 +284,12 @@ def main() -> int:
     vision = read_text("VISION.md")
     security = read_text("SECURITY.md")
     changes = read_text("CHANGES.md")
+    if "GitHub Actions" not in readme or ".github/workflows/check.yml" not in readme:
+        failures.append("README.md must document the GitHub Actions baseline")
+    if "GitHub Actions" not in vision or "make check" not in vision:
+        failures.append("VISION.md must document the GitHub Actions baseline")
+    if "GitHub Actions" not in changes or "make check" not in changes:
+        failures.append("CHANGES must record the GitHub Actions baseline")
     for relative_path, text in [("README.md", readme), ("VISION.md", vision), ("SECURITY.md", security)]:
         if "image download guard" not in text.lower():
             failures.append(f"{relative_path} must document image download guardrails")

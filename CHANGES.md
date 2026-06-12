@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-12
+
+- Stopped the hosted checkout from persisting its credential and added an exact
+  static contract for the sole workflow, permissions, and checkout step.
+
 ## 2026-06-10
 
 - Added an album art connection guard with HTTPS-only transport, 10-second

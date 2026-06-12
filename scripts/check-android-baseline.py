@@ -46,6 +46,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-10-hosted-static-validation.md",
     "docs/plans/2026-06-10-https-profile-images.md",
     "docs/plans/2026-06-12-album-art-connection-guard.md",
+    "docs/plans/2026-06-12-checkout-credential-boundary.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -295,6 +296,7 @@ def main() -> int:
         "docs/plans/2026-06-10-hosted-static-validation.md",
         "docs/plans/2026-06-10-https-profile-images.md",
         "docs/plans/2026-06-12-album-art-connection-guard.md",
+        "docs/plans/2026-06-12-checkout-credential-boundary.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -335,6 +337,10 @@ def main() -> int:
             failures.append(f"album art verification must record {evidence}")
 
     workflow = read_text(".github/workflows/check.yml")
+    workflow_files = [
+        *sorted((ROOT / ".github/workflows").glob("*.yml")),
+        *sorted((ROOT / ".github/workflows").glob("*.yaml")),
+    ]
     for expected in [
         "permissions:\n  contents: read",
         "cancel-in-progress: true",
@@ -347,6 +353,53 @@ def main() -> int:
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
+
+    checkout_action = (
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10"
+    )
+    checkout_blocks = re.findall(
+        rf"(?m)^(?P<indent> *)- +uses: +{re.escape(checkout_action)}[^\n]*\n"
+        rf"(?P=indent)  with:\n"
+        rf"(?P=indent)    persist-credentials: +false *$",
+        workflow,
+    )
+    checkout_actions = re.findall(
+        r"(?m)^\s*-\s+uses:\s+actions/checkout@",
+        workflow,
+    )
+    if not (
+        len(workflow_files) == 1
+        and workflow.count("permissions:") == 1
+        and workflow.count("contents: read") == 1
+        and not re.search(r"(?m)^\s*[A-Za-z-]+:\s*write\s*$", workflow)
+        and len(checkout_actions) == 1
+        and workflow.count(checkout_action) == 1
+        and len(checkout_blocks) == 1
+        and workflow.count("persist-credentials: false") == 1
+        and "persist-credentials: true" not in workflow
+    ):
+        failures.append(
+            "Check workflow must keep one read-only permission block and one "
+            "pinned, credential-free checkout"
+        )
+
+    checkout_plan = read_text(
+        "docs/plans/2026-06-12-checkout-credential-boundary.md"
+    )
+    checkout_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", checkout_plan)
+    checkout_work = markdown_section(checkout_plan, "Work Completed")
+    checkout_verification = markdown_section(
+        checkout_plan, "Verification Completed"
+    )
+    if not (
+        checkout_status == ["completed"]
+        and checkout_work
+        and "make check" in checkout_verification
+    ):
+        failures.append(
+            "checkout credential plan must record one completed status, "
+            "completed work, and make check verification"
+        )
 
     readme = read_text("README.md")
     vision = read_text("VISION.md")

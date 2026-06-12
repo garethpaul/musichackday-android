@@ -625,7 +625,7 @@ public class RdioApp extends Activity implements RdioListener {
                 JSONObject t = new JSONObject();
                 try {
                     t.put("tweet", s.getText());
-                    t.put("src", s.getUser().getBiggerProfileImageURL());
+                    t.put("src", s.getUser().getBiggerProfileImageURLHttps());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

@@ -24,7 +24,7 @@
 
 ## Coding conventions
 
-- Language mix noted in the README: Java (11).
+- The application uses Java; repository validation uses Python, Make, and YAML.
 - Use the checked-in Gradle wrapper for Android builds when an SDK is configured.
 
 ## Testing guidance
@@ -46,7 +46,7 @@
 - `Constants.java` is intentionally ignored. Commit only `Constants.java.example`, and keep the placeholder values obviously fake.
 - Image cache entries use SHA-256 cache filenames derived from media URLs while staying inside the app-private cache directory.
 - Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
-- The HTTP image URL guard should keep non-HTTP(S) media references out of image loading.
+- The HTTPS profile image guard keeps cleartext and non-web media references out of image loading.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 
 ## Agent workflow

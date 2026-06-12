@@ -60,6 +60,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make lint`, `make test`, `make build`, and `make check` run the SDK-free
   static Android baseline.
+- Pinned `ubuntu-24.04` GitHub Actions runs the same baseline on Python 3.12
+  without credentials, OAuth exchange, media downloads, Android SDK setup, or
+  execution of the obsolete Gradle build.
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
 
 The Make gates are SDK-free and intended for quick baseline verification on
@@ -81,6 +84,8 @@ GitHub Actions runs the same SDK-free `make check` gate through
   staying inside the app-private cache directory.
 - Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
 - The HTTP image URL guard should keep non-HTTP(S) media references out of image loading.
+- The HTTPS profile image guard selects Twitter's encrypted profile-image URL
+  and rejects cleartext HTTP again at the loader boundary.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard accepts only the configured callback scheme and
   authority before exchanging Twitter verifier values.
@@ -104,6 +109,8 @@ GitHub Actions runs the same SDK-free `make check` gate through
 - Review changes touching file, media, JSON, XML, CSV, OCR, or data parsing; examples from the scan include app/build.gradle, app/src/main/AndroidManifest.xml, app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java, app/src/main/java/com/twitterdev/rdio/app/MainActivity.java, and 6 more.
 - Keep image download guards in place because media URLs and row image views are transient in scrolling lists.
 - Keep the HTTP image URL guard in place so local or non-web URI schemes are not loaded as remote media.
+- Keep the HTTPS profile image guard in place so profile media cannot fall back
+  to cleartext HTTP transport.
 - Keep the OAuth callback URI guard in place so only the configured callback
   endpoint resumes Twitter login.
 - Keep the OAuth callback path guard in place so lookalike callback paths do

@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 CONSTANTS_EXAMPLE = "app/src/main/java/com/twitterdev/rdio/app/Constants.java.example"
 REQUIRED_FILES = [
+    ".github/CODEOWNERS",
     ".github/workflows/check.yml",
     "README.md",
     "SECURITY.md",
@@ -44,6 +45,8 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-editor-metadata-ignore.md",
     "docs/plans/2026-06-10-oauth-callback-token-guard.md",
     "docs/plans/2026-06-10-ci-baseline.md",
+    "docs/plans/2026-06-10-hosted-static-validation.md",
+    "docs/plans/2026-06-10-https-profile-images.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -124,6 +127,7 @@ def main() -> int:
     root_gradle = read_text("build.gradle")
     makefile = read_text("Makefile")
     workflow = read_text(".github/workflows/check.yml")
+    codeowners = read_text(".github/CODEOWNERS")
     for target in [
         ".PHONY: build check lint static-check test verify",
         "check: verify",
@@ -135,8 +139,6 @@ def main() -> int:
 
     if "com.android.tools.build:gradle:0.8.3" not in root_gradle:
         failures.append("Android Gradle plugin must be pinned to 0.8.3")
-    if "actions/checkout@v4" not in workflow or "actions/setup-python@v5" not in workflow or "make check" not in workflow:
-        failures.append("GitHub Actions must run the SDK-free make check baseline")
     if "https://dl.google.com/dl/android/maven2/" not in root_gradle:
         failures.append("Google Maven repository must stay configured for legacy Android support artifacts")
     app_gradle = read_text("app/build.gradle")
@@ -245,8 +247,11 @@ def main() -> int:
     if "url-download" in read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java"):
         failures.append("tweet image URLs must not be logged")
     image_download = read_text("app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java")
-    if "isHttpImageUrl" not in image_download or "URLUtil.isHttpUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "params.length == 0" not in image_download:
-        failures.append("ImageDownload must guard missing and non-HTTP(S) image URLs")
+    if "isHttpsImageUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "URLUtil.isHttpUrl" in image_download or "params.length == 0" not in image_download:
+        failures.append("ImageDownload must guard missing URLs and accept only HTTPS images")
+    rdio_app = read_text("app/src/main/java/com/twitterdev/rdio/app/RdioApp.java")
+    if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
+        failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
     if "ImageView imageView = imageViewReference.get()" not in image_download or "imageView == null" not in image_download:
         failures.append("ImageDownload must guard recycled ImageView references")
     memory_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/MemoryCache.java")
@@ -271,6 +276,8 @@ def main() -> int:
         "docs/plans/2026-06-09-editor-metadata-ignore.md",
         "docs/plans/2026-06-10-oauth-callback-token-guard.md",
         "docs/plans/2026-06-10-ci-baseline.md",
+        "docs/plans/2026-06-10-hosted-static-validation.md",
+        "docs/plans/2026-06-10-https-profile-images.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -279,6 +286,30 @@ def main() -> int:
             failures.append(f"{relative_path} must record completed status")
         if "scripts/check-android-baseline.py" not in plan:
             failures.append(f"{relative_path} must reference the active baseline checker")
+
+    workflow = read_text(".github/workflows/check.yml")
+    for expected in [
+        "permissions:\n  contents: read",
+        "cancel-in-progress: true",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "persist-credentials: false",
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        'python-version: "3.12"',
+        "run: make check",
+    ]:
+        if expected not in workflow:
+            failures.append(f"Check workflow must keep {expected}")
+    workflow_files = sorted(
+        str(path.relative_to(ROOT))
+        for path in (ROOT / ".github/workflows").rglob("*")
+        if path.is_file()
+    )
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("check.yml must be the repository's only hosted workflow")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must assign the repository to @garethpaul")
 
     readme = read_text("README.md")
     vision = read_text("VISION.md")
@@ -299,6 +330,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document memory cache entry guards")
         if "http image url guard" not in text.lower():
             failures.append(f"{relative_path} must document HTTP image URL guardrails")
+        if "https profile image guard" not in text.lower():
+            failures.append(f"{relative_path} must document HTTPS profile image guardrails")
         if "oauth callback uri guard" not in text.lower():
             failures.append(f"{relative_path} must document OAuth callback URI guardrails")
         if "oauth callback path guard" not in text.lower():
@@ -321,6 +354,8 @@ def main() -> int:
         failures.append("CHANGES must record memory cache entry guards")
     if "http image url guard" not in changes.lower():
         failures.append("CHANGES must record HTTP image URL guardrails")
+    if "https profile image guard" not in changes.lower():
+        failures.append("CHANGES must record HTTPS profile image guardrails")
     if "oauth callback uri guard" not in changes.lower():
         failures.append("CHANGES must record OAuth callback URI guardrails")
     if "oauth callback path guard" not in changes.lower():

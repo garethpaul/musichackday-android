@@ -45,6 +45,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-10-oauth-callback-token-guard.md",
     "docs/plans/2026-06-10-hosted-static-validation.md",
     "docs/plans/2026-06-10-https-profile-images.md",
+    "docs/plans/2026-06-12-album-art-connection-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -55,6 +56,14 @@ TOKEN_LOG_PATTERNS = [
 
 def read_text(relative_path: str) -> str:
     return (ROOT / relative_path).read_text(encoding="utf-8", errors="replace")
+
+
+def markdown_section(text: str, heading: str) -> str:
+    match = re.search(
+        rf"(?ms)^## {re.escape(heading)}\s*$\n(.*?)(?=^## |\Z)",
+        text,
+    )
+    return match.group(1).strip() if match else ""
 
 
 def android_attr(name: str) -> str:
@@ -248,6 +257,18 @@ def main() -> int:
     rdio_app = read_text("app/src/main/java/com/twitterdev/rdio/app/RdioApp.java")
     if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
         failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
+    artwork_task = rdio_app.split("// Fetch album art in the background", 1)[1].split("artworkTask.execute(track)", 1)[0]
+    if (
+        "URLUtil.isHttpsUrl(artworkUrl)" not in artwork_task
+        or "HttpURLConnection connection" not in artwork_task
+        or "connection.setConnectTimeout(10000)" not in artwork_task
+        or "connection.setReadTimeout(10000)" not in artwork_task
+    ):
+        failures.append("album art downloads must require HTTPS and bounded connection timeouts")
+    if "finally {" not in artwork_task or "bufferedInputStream.close()" not in artwork_task or "connection.disconnect()" not in artwork_task:
+        failures.append("album art downloads must close streams and disconnect in all paths")
+    if "Downloading album art:" in artwork_task or 'Log.e(TAG, "Album art download failed", e)' in artwork_task:
+        failures.append("album art failure logging must not include media URLs or exception details")
     if "ImageView imageView = imageViewReference.get()" not in image_download or "imageView == null" not in image_download:
         failures.append("ImageDownload must guard recycled ImageView references")
     memory_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/MemoryCache.java")
@@ -273,6 +294,7 @@ def main() -> int:
         "docs/plans/2026-06-10-oauth-callback-token-guard.md",
         "docs/plans/2026-06-10-hosted-static-validation.md",
         "docs/plans/2026-06-10-https-profile-images.md",
+        "docs/plans/2026-06-12-album-art-connection-guard.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -281,6 +303,36 @@ def main() -> int:
             failures.append(f"{relative_path} must record completed status")
         if "scripts/check-android-baseline.py" not in plan:
             failures.append(f"{relative_path} must reference the active baseline checker")
+
+    album_art_plan = read_text("docs/plans/2026-06-12-album-art-connection-guard.md")
+    album_art_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", album_art_plan)
+    album_art_work = markdown_section(album_art_plan, "Work Completed")
+    album_art_verification = markdown_section(album_art_plan, "Verification Completed")
+    if album_art_status != ["completed"] or not album_art_work:
+        failures.append("album art connection guard plan must record one completed status and completed work")
+    if not album_art_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", album_art_verification
+    ):
+        failures.append("album art connection guard plan must record completed verification")
+    for evidence in [
+        "python3 -m py_compile scripts/check-android-baseline.py",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "git diff --check",
+        "27397456751",
+        "27397458335",
+        "1fd944d8b02118d817f98603aed3050bceb6dc32",
+        "URLUtil.isHttpsUrl(artworkUrl)",
+        "connection.setConnectTimeout(10000)",
+        "connection.setReadTimeout(10000)",
+        "bufferedInputStream.close()",
+        "connection.disconnect()",
+        "Album art download failed",
+    ]:
+        if evidence not in album_art_verification:
+            failures.append(f"album art verification must record {evidence}")
 
     workflow = read_text(".github/workflows/check.yml")
     for expected in [
@@ -325,6 +377,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document local editor metadata guardrails")
         if "make lint" not in text or "make test" not in text or "make build" not in text or "make check" not in text:
             failures.append(f"{relative_path} must document standard Make gate targets")
+        if "album art connection guard" not in text.lower():
+            failures.append(f"{relative_path} must document the album art connection guard")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -335,6 +389,8 @@ def main() -> int:
         failures.append("CHANGES must record HTTP image URL guardrails")
     if "https profile image guard" not in changes.lower():
         failures.append("CHANGES must record HTTPS profile image guardrails")
+    if "album art connection guard" not in changes.lower():
+        failures.append("CHANGES must record album art connection guardrails")
     if "oauth callback uri guard" not in changes.lower():
         failures.append("CHANGES must record OAuth callback URI guardrails")
     if "oauth callback path guard" not in changes.lower():

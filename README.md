@@ -83,6 +83,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - The HTTP image URL guard should keep non-HTTP(S) media references out of image loading.
 - The HTTPS profile image guard selects Twitter's encrypted profile-image URL
   and rejects cleartext HTTP again at the loader boundary.
+- The album art connection guard requires HTTPS, applies 10-second connect and
+  read timeouts, sanitizes failures, and closes network resources on every path.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard accepts only the configured callback scheme and
   authority before exchanging Twitter verifier values.
@@ -108,6 +110,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep the HTTP image URL guard in place so local or non-web URI schemes are not loaded as remote media.
 - Keep the HTTPS profile image guard in place so profile media cannot fall back
   to cleartext HTTP transport.
+- Keep the album art connection guard in place so playback artwork cannot use
+  cleartext transport, unbounded waits, or leaked connections.
 - Keep the OAuth callback URI guard in place so only the configured callback
   endpoint resumes Twitter login.
 - Keep the OAuth callback path guard in place so lookalike callback paths do

@@ -26,8 +26,8 @@ package com.twitterdev.rdio.app;
         import java.io.BufferedInputStream;
         import java.io.IOException;
         import java.io.InputStream;
+        import java.net.HttpURLConnection;
         import java.net.URL;
-        import java.net.URLConnection;
         import java.util.ArrayList;
         import java.util.Iterator;
         import java.util.LinkedList;
@@ -58,6 +58,7 @@ package com.twitterdev.rdio.app;
         import android.media.MediaPlayer;
         import android.media.MediaPlayer.OnCompletionListener;
         import android.net.Uri;
+        import android.webkit.URLUtil;
         import android.os.AsyncTask;
         import android.os.Bundle;
         import android.util.DisplayMetrics;
@@ -371,23 +372,42 @@ public class RdioApp extends Activity implements RdioListener {
                 Track track = params[0];
                 try {
                     String artworkUrl = track.albumArt.replace("square-200", "square-600");
-                    Log.i(TAG, "Downloading album art: " + artworkUrl);
-                    Bitmap bm = null;
+                    if (!URLUtil.isHttpsUrl(artworkUrl)) {
+                        Log.e(TAG, "Album art URL must use HTTPS");
+                        return null;
+                    }
+
+                    HttpURLConnection connection = null;
+                    InputStream inputStream = null;
+                    BufferedInputStream bufferedInputStream = null;
                     try {
                         URL aURL = new URL(artworkUrl);
-                        URLConnection conn = aURL.openConnection();
-                        conn.connect();
-                        InputStream is = conn.getInputStream();
-                        BufferedInputStream bis = new BufferedInputStream(is);
-                        bm = BitmapFactory.decodeStream(bis);
-                        bis.close();
-                        is.close();
+                        connection = (HttpURLConnection) aURL.openConnection();
+                        connection.setConnectTimeout(10000);
+                        connection.setReadTimeout(10000);
+                        connection.connect();
+                        inputStream = connection.getInputStream();
+                        bufferedInputStream = new BufferedInputStream(inputStream);
+                        return BitmapFactory.decodeStream(bufferedInputStream);
                     } catch (IOException e) {
-                        Log.e(TAG, "Error getting bitmap", e);
+                        Log.e(TAG, "Album art download failed");
+                        return null;
+                    } finally {
+                        try {
+                            if (bufferedInputStream != null) {
+                                bufferedInputStream.close();
+                            } else if (inputStream != null) {
+                                inputStream.close();
+                            }
+                        } catch (IOException ignored) {
+                            Log.e(TAG, "Album art stream close failed");
+                        }
+                        if (connection != null) {
+                            connection.disconnect();
+                        }
                     }
-                    return bm;
                 } catch (Exception e) {
-                    Log.e(TAG, "Error downloading artwork", e);
+                    Log.e(TAG, "Album art processing failed");
                     return null;
                 }
             }

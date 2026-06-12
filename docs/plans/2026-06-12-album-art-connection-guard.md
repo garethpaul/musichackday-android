@@ -40,7 +40,15 @@ Files:
 Require the transport, timeout, lifecycle, and sanitized logging contract and
 document the SDK-free verification boundary.
 
-## Verification
+## Work Completed
+
+- Required HTTPS before opening the album-art connection.
+- Added 10-second connect and read timeouts.
+- Closed the buffered input stream and disconnected the HTTP connection from
+  the `finally` path.
+- Replaced URL and exception-bearing failure logs with a generic message.
+
+## Verification Completed
 
 Completed locally on 2026-06-12:
 
@@ -55,11 +63,16 @@ Completed locally on 2026-06-12:
 
 The local gate is SDK-free and does not execute the obsolete Android toolchain.
 
-Completed on GitHub Actions for implementation head
-`07bc050493d0c703f6ded9c06f09d187b16b52f7`:
+Completed on GitHub Actions for final head
+`1fd944d8b02118d817f98603aed3050bceb6dc32`:
 
-- push run `27397446444`: success
-- pull-request run `27397447181`: success
+- push run `27397456751`: success
+- pull-request run `27397458335`: success
+
+The verified implementation preserves `URLUtil.isHttpsUrl(artworkUrl)`,
+`connection.setConnectTimeout(10000)`, `connection.setReadTimeout(10000)`,
+`bufferedInputStream.close()`, `connection.disconnect()`, and the sanitized
+`Album art download failed` message.
 
 ## Boundaries
 

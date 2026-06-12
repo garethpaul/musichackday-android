@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 CONSTANTS_EXAMPLE = "app/src/main/java/com/twitterdev/rdio/app/Constants.java.example"
 REQUIRED_FILES = [
+    ".github/CODEOWNERS",
     ".github/workflows/check.yml",
     "README.md",
     "SECURITY.md",
@@ -43,6 +44,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
     "docs/plans/2026-06-09-editor-metadata-ignore.md",
     "docs/plans/2026-06-10-oauth-callback-token-guard.md",
+    "docs/plans/2026-06-10-ci-baseline.md",
     "docs/plans/2026-06-10-hosted-static-validation.md",
     "docs/plans/2026-06-10-https-profile-images.md",
 ]
@@ -124,6 +126,8 @@ def main() -> int:
 
     root_gradle = read_text("build.gradle")
     makefile = read_text("Makefile")
+    workflow = read_text(".github/workflows/check.yml")
+    codeowners = read_text(".github/CODEOWNERS")
     for target in [
         ".PHONY: build check lint static-check test verify",
         "check: verify",
@@ -271,6 +275,7 @@ def main() -> int:
         "docs/plans/2026-06-09-sanitized-oauth-error-logging.md",
         "docs/plans/2026-06-09-editor-metadata-ignore.md",
         "docs/plans/2026-06-10-oauth-callback-token-guard.md",
+        "docs/plans/2026-06-10-ci-baseline.md",
         "docs/plans/2026-06-10-hosted-static-validation.md",
         "docs/plans/2026-06-10-https-profile-images.md",
     ]:
@@ -289,17 +294,33 @@ def main() -> int:
         "runs-on: ubuntu-24.04",
         "timeout-minutes: 10",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "persist-credentials: false",
         "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
         'python-version: "3.12"',
         "run: make check",
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
+    workflow_files = sorted(
+        str(path.relative_to(ROOT))
+        for path in (ROOT / ".github/workflows").rglob("*")
+        if path.is_file()
+    )
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("check.yml must be the repository's only hosted workflow")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must assign the repository to @garethpaul")
 
     readme = read_text("README.md")
     vision = read_text("VISION.md")
     security = read_text("SECURITY.md")
     changes = read_text("CHANGES.md")
+    if "GitHub Actions" not in readme or ".github/workflows/check.yml" not in readme:
+        failures.append("README.md must document the GitHub Actions baseline")
+    if "GitHub Actions" not in vision or "make check" not in vision:
+        failures.append("VISION.md must document the GitHub Actions baseline")
+    if "GitHub Actions" not in changes or "make check" not in changes:
+        failures.append("CHANGES must record the GitHub Actions baseline")
     for relative_path, text in [("README.md", readme), ("VISION.md", vision), ("SECURITY.md", security)]:
         if "image download guard" not in text.lower():
             failures.append(f"{relative_path} must document image download guardrails")

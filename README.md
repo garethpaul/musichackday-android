@@ -59,6 +59,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make lint`, `make test`, `make build`, and `make check` run the SDK-free
   static Android baseline.
+- The Make gates are location-independent. From another directory, pass the
+  checkout's Makefile by absolute path, such as
+  `make -f /path/to/musichackday-android/Makefile check`.
 - Pinned `ubuntu-24.04` GitHub Actions uses a read-only, credential-free
   checkout and runs the same baseline on Python 3.12 without credentials,
   OAuth exchange, media downloads, Android SDK setup, or execution of the
@@ -130,6 +133,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - Run `make lint`, `make test`, `make build`, and `make check` before pushing
   Gradle, credential-template, manifest, logging, or documentation changes.
+- Use an absolute Makefile path when running those gates outside the checkout.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the local gate alias
   baseline.
 - See `docs/plans/2026-06-09-sanitized-oauth-error-logging.md` for the

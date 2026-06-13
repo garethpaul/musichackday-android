@@ -10,6 +10,21 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_MAKEFILE = """ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
+.PHONY: build check lint static-check test verify
+
+PYTHON ?= python3
+
+check: verify
+
+verify: static-check
+
+lint test build: static-check
+
+static-check:
+\t$(PYTHON) "$(ROOT)/scripts/check-android-baseline.py"
+"""
 CONSTANTS_EXAMPLE = "app/src/main/java/com/twitterdev/rdio/app/Constants.java.example"
 REQUIRED_FILES = [
     ".github/workflows/check.yml",
@@ -47,6 +62,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-10-https-profile-images.md",
     "docs/plans/2026-06-12-album-art-connection-guard.md",
     "docs/plans/2026-06-12-checkout-credential-boundary.md",
+    "docs/plans/2026-06-13-location-independent-make.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -134,14 +150,10 @@ def main() -> int:
 
     root_gradle = read_text("build.gradle")
     makefile = read_text("Makefile")
-    for target in [
-        ".PHONY: build check lint static-check test verify",
-        "check: verify",
-        "verify: static-check",
-        "lint test build: static-check",
-    ]:
-        if target not in makefile:
-            failures.append(f"Makefile must expose target contract: {target}")
+    if makefile != EXPECTED_MAKEFILE:
+        failures.append(
+            "Makefile must exactly preserve rooted SDK-free aliases and the Python override"
+        )
 
     if "com.android.tools.build:gradle:0.8.3" not in root_gradle:
         failures.append("Android Gradle plugin must be pinned to 0.8.3")
@@ -386,6 +398,9 @@ def main() -> int:
     checkout_plan = read_text(
         "docs/plans/2026-06-12-checkout-credential-boundary.md"
     )
+    location_independent_make_plan = read_text(
+        "docs/plans/2026-06-13-location-independent-make.md"
+    )
     checkout_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", checkout_plan)
     checkout_work = markdown_section(checkout_plan, "Work Completed")
     checkout_verification = markdown_section(
@@ -405,6 +420,19 @@ def main() -> int:
     vision = read_text("VISION.md")
     security = read_text("SECURITY.md")
     changes = read_text("CHANGES.md")
+    if "make -f /path/to/musichackday-android/Makefile check" not in readme:
+        failures.append("README must document location-independent Makefile invocation")
+    if not all(
+        evidence in location_independent_make_plan.lower()
+        for evidence in [
+            "status: completed",
+            "root and external-directory",
+            "six isolated hostile mutations",
+        ]
+    ):
+        failures.append(
+            "location-independent Make plan must record completed root, external, and mutation verification"
+        )
     for relative_path, text in [("README.md", readme), ("VISION.md", vision), ("SECURITY.md", security)]:
         if "image download guard" not in text.lower():
             failures.append(f"{relative_path} must document image download guardrails")

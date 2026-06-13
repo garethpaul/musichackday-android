@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-13
+
+- Made every SDK-free Make alias resolve the baseline checker from the checkout
+  when the Makefile is invoked by absolute path.
+
 ## 2026-06-12
 
 - Stopped the hosted checkout from persisting its credential and added an exact

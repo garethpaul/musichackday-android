@@ -1,3 +1,5 @@
+ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
 .PHONY: build check lint static-check test verify
 
 PYTHON ?= python3
@@ -9,4 +11,4 @@ verify: static-check
 lint test build: static-check
 
 static-check:
-	$(PYTHON) scripts/check-android-baseline.py
+	$(PYTHON) "$(ROOT)/scripts/check-android-baseline.py"

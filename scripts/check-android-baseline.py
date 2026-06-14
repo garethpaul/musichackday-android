@@ -64,6 +64,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-12-checkout-credential-boundary.md",
     "docs/plans/2026-06-13-location-independent-make.md",
     "docs/plans/2026-06-14-twitter-authorization-origin-guard.md",
+    "docs/plans/2026-06-14-twitter-search-failure-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -288,6 +289,24 @@ def main() -> int:
         failures.append("Rdio authorization errors must use sanitized action-level logging")
     if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
         failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
+    search_task = rdio_app.split("private class getSearch", 1)[1]
+    search_call_index = search_task.find("result = twitter.search(query)")
+    search_catch_index = search_task.find("catch (TwitterException e)")
+    search_log_index = search_task.find('Log.e(TAG, "Twitter search failed")')
+    search_return_index = search_task.find("return null;", search_catch_index)
+    search_iteration_index = search_task.find("for (twitter4j.Status status : result.getTweets())")
+    if (
+        not (0 <= search_call_index < search_catch_index < search_log_index < search_return_index < search_iteration_index)
+        or 'Log.v("Search for ", params[0])' in search_task
+        or 'Log.v("LoggedIn", "getUser..doInBackground")' in search_task
+        or "e.printStackTrace()" in search_task
+    ):
+        failures.append("Twitter search failures must use redacted logging and return before result iteration")
+    if (
+        'Log.e(TAG, "Twitter result formatting failed")' not in search_task
+        or search_task.find('Log.e(TAG, "Twitter result formatting failed")') > search_task.find("continue;")
+    ):
+        failures.append("Twitter result formatting failures must use redacted logging and skip malformed rows")
     artwork_task = rdio_app.split("// Fetch album art in the background", 1)[1].split("artworkTask.execute(track)", 1)[0]
     if (
         "URLUtil.isHttpsUrl(artworkUrl)" not in artwork_task
@@ -508,6 +527,19 @@ def main() -> int:
         failures.append("CHANGES must record local editor metadata guardrails")
     if "twitter authorization origin guard" not in changes.lower():
         failures.append("CHANGES must record the Twitter authorization origin guard")
+    for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
+        if "twitter search failure guard" not in read_text(relative_path).lower():
+            failures.append(f"{relative_path} must document the Twitter search failure guard")
+    search_failure_plan = read_text("docs/plans/2026-06-14-twitter-search-failure-guard.md")
+    search_failure_verification = markdown_section(search_failure_plan, "Verification Completed")
+    if (
+        "status: completed" not in search_failure_plan
+        or "All four Make gates passed" not in search_failure_verification
+        or "Seven isolated hostile mutations were rejected" not in search_failure_verification
+        or "external directory" not in search_failure_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", search_failure_verification)
+    ):
+        failures.append("Twitter search failure guard plan must record completed verification")
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
         if "rdio authorization error redaction" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document Rdio authorization error redaction")

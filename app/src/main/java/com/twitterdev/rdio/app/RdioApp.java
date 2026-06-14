@@ -605,8 +605,6 @@ public class RdioApp extends Activity implements RdioListener {
         @Override
         protected String doInBackground(String... params) {
 
-            Log.v("LoggedIn", "getUser..doInBackground");
-            Log.v("Search for ", params[0]);
             ConfigurationBuilder builder = new ConfigurationBuilder();
             builder.setOAuthConsumerKey(Constants.API_KEY);
             builder.setOAuthConsumerSecret(Constants.API_SECRET);
@@ -628,11 +626,12 @@ public class RdioApp extends Activity implements RdioListener {
             Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);
             // Define the twitter_handle
             Query query = new Query(params[0]);
-            QueryResult result = null;
+            QueryResult result;
             try {
                 result = twitter.search(query);
             } catch (TwitterException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Twitter search failed");
+                return null;
             }
 
 
@@ -645,7 +644,8 @@ public class RdioApp extends Activity implements RdioListener {
                     t.put("tweet", s.getText());
                     t.put("src", s.getUser().getBiggerProfileImageURLHttps());
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Twitter result formatting failed");
+                    continue;
                 }
                 tweets.put(t);
                 items.add(s.getText());

@@ -85,6 +85,9 @@ OAuth callback reports should include whether the OAuth callback token guard
 rejects callbacks whose token does not match the active request token.
 OAuth logging reports should include whether sanitized OAuth error logging can
 be bypassed to write provider exception details or stack traces.
+Twitter search reports should include whether the Twitter search failure guard
+can be bypassed to log raw queries, provider stack traces, or iterate a failed
+result.
 
 ## Dependency and Supply Chain Security
 

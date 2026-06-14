@@ -2,6 +2,8 @@
 
 ## 2026-06-14
 
+- Added a Twitter search failure guard that redacts query/provider diagnostics
+  and returns before iterating a failed result.
 - Added Rdio authorization error redaction for cancelled SDK callbacks.
 - Added a Twitter authorization origin guard so OAuth browser launch requires
   the canonical HTTPS Twitter authentication endpoint.

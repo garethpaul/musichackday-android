@@ -1,6 +1,6 @@
 # Twitter Search Failure Guard
 
-Status: planned
+status: completed
 
 ## Problem
 
@@ -50,8 +50,23 @@ then crash while iterating `result.getTweets()`.
 
 ## Work Completed
 
-Pending implementation.
+- Removed raw query and background-state logs from the Twitter search task.
+- Replaced Twitter provider stack traces with one fixed failure message and a
+  return before result iteration.
+- Replaced JSON formatting stack traces with one fixed message and skipped the
+  malformed row.
+- Added ordering-sensitive static contracts and project guidance.
 
 ## Verification Completed
 
-Pending validation.
+- All four Make gates passed from the checkout and the canonical check passed
+  from an external directory through the absolute Makefile path.
+- Seven isolated hostile mutations were rejected: raw query logging, Twitter
+  stack traces, JSON formatting stack traces, missing failure return, result
+  iteration before the guarded search, missing maintenance guidance, and stale
+  plan status.
+- Checker compilation, `git diff --check`, and exact intended-path,
+  generated-artifact, secret-pattern, conflict-marker, binary, and large-file
+  audits passed.
+- The SDK-free baseline made no Twitter, Rdio, image, or other live network
+  request and did not invoke Android SDK or Gradle builds.

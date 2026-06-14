@@ -61,6 +61,9 @@ Helpful reports include:
   active request token before requesting Twitter access tokens.
 - Sanitized OAuth error logging should keep Twitter login failure logs at
   action-level messages without exception details or stack traces.
+- The Twitter authorization origin guard should require the canonical HTTPS
+  Twitter host, default port, and authenticate path before launching an
+  external browser.
 - Local editor metadata should stay ignored so machine-specific SDK paths,
   workspace state, and IDE module files are not committed.
 

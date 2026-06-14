@@ -177,6 +177,14 @@ public class MainActivity extends ActionBarActivity {
         return expectedToken != null && expectedToken.equals(callbackToken);
     }
 
+    private boolean isTrustedTwitterAuthenticationUri(Uri uri) {
+        return uri != null
+                && "https".equals(uri.getScheme())
+                && "api.twitter.com".equals(uri.getHost())
+                && uri.getPort() == -1
+                && "/oauth/authenticate".equals(uri.getPath());
+    }
+
 
     private void loginToTwitter() {
         // Check if already logged in
@@ -200,8 +208,12 @@ public class MainActivity extends ActionBarActivity {
 
                         requestToken = twitter
                                 .getOAuthRequestToken(Constants.CALLBACKURL);
-                        MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
-                                .parse(requestToken.getAuthenticationURL())));
+                        Uri authenticationUri = Uri.parse(requestToken.getAuthenticationURL());
+                        if (!isTrustedTwitterAuthenticationUri(authenticationUri)) {
+                            logTwitterLoginFailure("Authorization URL validation");
+                            return;
+                        }
+                        MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri));
 
                     } catch (Exception e) {
                         logTwitterLoginFailure("Request token creation");

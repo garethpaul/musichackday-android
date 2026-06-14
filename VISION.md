@@ -36,6 +36,7 @@ Priority:
 - Keep the OAuth callback verifier guard strict before exchanging access tokens
 - Keep the OAuth callback token guard bound to the active request token
 - Keep sanitized OAuth error logging for Twitter login failures
+- Keep the Twitter authorization origin guard before browser launch
 - Keep local editor metadata out of the shared Android project baseline
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
@@ -84,6 +85,8 @@ The OAuth callback token guard should keep verifier exchange bound to the
 request token created by the local login attempt.
 Sanitized OAuth error logging should keep Twitter login failures out of
 exception-detail and stack-trace logs.
+The Twitter authorization origin guard should keep outbound login navigation
+on the canonical HTTPS Twitter authentication endpoint.
 Local editor metadata should stay ignored so IDE workspace choices do not
 change the preserved Android project baseline.
 

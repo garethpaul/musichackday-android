@@ -100,6 +100,9 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   request token before exchanging Twitter verifier values.
 - Sanitized OAuth error logging keeps Twitter login failures at action-level
   messages without exception details or stack traces.
+- The Twitter authorization origin guard launches the browser only for the
+  canonical HTTPS `api.twitter.com/oauth/authenticate` endpoint on its default
+  port.
 - Local editor metadata stays ignored so Android Studio and VS Code workspace
   files do not become part of the shared verification baseline.
 
@@ -126,6 +129,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   token cannot resume the local Twitter login.
 - Keep sanitized OAuth error logging in place so failed Twitter login attempts
   do not write provider exception details to Android logs.
+- Keep the Twitter authorization origin guard in place so library or
+  configuration drift cannot launch login on an alternate scheme or origin.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
 
 ## Maintenance Notes

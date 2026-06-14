@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-14
+
+- Added a Twitter authorization origin guard so OAuth browser launch requires
+  the canonical HTTPS Twitter authentication endpoint.
+
 ## 2026-06-13
 
 - Made every SDK-free Make alias resolve the baseline checker from the checkout

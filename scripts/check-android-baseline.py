@@ -63,6 +63,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-12-album-art-connection-guard.md",
     "docs/plans/2026-06-12-checkout-credential-boundary.md",
     "docs/plans/2026-06-13-location-independent-make.md",
+    "docs/plans/2026-06-14-twitter-authorization-origin-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -252,6 +253,16 @@ def main() -> int:
         or "e.getMessage()" in main_activity
     ):
         failures.append("MainActivity OAuth errors must use sanitized action-level logging")
+    if (
+        "private boolean isTrustedTwitterAuthenticationUri(Uri uri)" not in main_activity
+        or '"https".equals(uri.getScheme())' not in main_activity
+        or '"api.twitter.com".equals(uri.getHost())' not in main_activity
+        or "uri.getPort() == -1" not in main_activity
+        or '"/oauth/authenticate".equals(uri.getPath())' not in main_activity
+        or "if (!isTrustedTwitterAuthenticationUri(authenticationUri))" not in main_activity
+        or "new Intent(Intent.ACTION_VIEW, authenticationUri)" not in main_activity
+    ):
+        failures.append("MainActivity must restrict outbound Twitter authorization to the canonical HTTPS origin")
 
     file_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/FileCache.java")
     if "context.getCacheDir()" not in file_cache:
@@ -420,6 +431,7 @@ def main() -> int:
     vision = read_text("VISION.md")
     security = read_text("SECURITY.md")
     changes = read_text("CHANGES.md")
+    authorization_origin_plan = read_text("docs/plans/2026-06-14-twitter-authorization-origin-guard.md")
     if "make -f /path/to/musichackday-android/Makefile check" not in readme:
         failures.append("README must document location-independent Makefile invocation")
     if not all(
@@ -460,6 +472,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document standard Make gate targets")
         if "album art connection guard" not in text.lower():
             failures.append(f"{relative_path} must document the album art connection guard")
+        if "twitter authorization origin guard" not in text.lower():
+            failures.append(f"{relative_path} must document the Twitter authorization origin guard")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -484,8 +498,12 @@ def main() -> int:
         failures.append("CHANGES must record sanitized OAuth error logging")
     if "local editor metadata" not in changes.lower():
         failures.append("CHANGES must record local editor metadata guardrails")
+    if "twitter authorization origin guard" not in changes.lower():
+        failures.append("CHANGES must record the Twitter authorization origin guard")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
+    if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:
+        failures.append("Twitter authorization origin guard plan must record completed verification")
 
     if failures:
         for failure in failures:

@@ -2,6 +2,7 @@
 
 ## 2026-06-14
 
+- Added Rdio authorization error redaction for cancelled SDK callbacks.
 - Added a Twitter authorization origin guard so OAuth browser launch requires
   the canonical HTTPS Twitter authentication endpoint.
 

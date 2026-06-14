@@ -100,6 +100,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   request token before exchanging Twitter verifier values.
 - Sanitized OAuth error logging keeps Twitter login failures at action-level
   messages without exception details or stack traces.
+- Rdio authorization error redaction keeps cancelled SDK diagnostics out of
+  application logs while preserving token cleanup.
 - The Twitter authorization origin guard launches the browser only for the
   canonical HTTPS `api.twitter.com/oauth/authenticate` endpoint on its default
   port.

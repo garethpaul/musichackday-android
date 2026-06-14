@@ -518,9 +518,7 @@ public class RdioApp extends Activity implements RdioListener {
                 }
             } else if (resultCode == RESULT_CANCELED) {
                 if (data != null) {
-                    String errorCode = data.getStringExtra(OAuth1WebViewActivity.EXTRA_ERROR_CODE);
-                    String errorDescription = data.getStringExtra(OAuth1WebViewActivity.EXTRA_ERROR_DESCRIPTION);
-                    Log.v(TAG, "ERROR: " + errorCode + " - " + errorDescription);
+                    Log.w(TAG, "Rdio authorization failed");
                 }
                 accessToken = null;
                 accessTokenSecret = null;

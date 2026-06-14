@@ -279,6 +279,13 @@ def main() -> int:
     if "isHttpsImageUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "URLUtil.isHttpUrl" in image_download or "params.length == 0" not in image_download:
         failures.append("ImageDownload must guard missing URLs and accept only HTTPS images")
     rdio_app = read_text("app/src/main/java/com/twitterdev/rdio/app/RdioApp.java")
+    if (
+        'Log.w(TAG, "Rdio authorization failed")' not in rdio_app
+        or "EXTRA_ERROR_CODE" in rdio_app
+        or "EXTRA_ERROR_DESCRIPTION" in rdio_app
+        or 'Log.v(TAG, "ERROR: "' in rdio_app
+    ):
+        failures.append("Rdio authorization errors must use sanitized action-level logging")
     if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
         failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
     artwork_task = rdio_app.split("// Fetch album art in the background", 1)[1].split("artworkTask.execute(track)", 1)[0]
@@ -320,6 +327,7 @@ def main() -> int:
         "docs/plans/2026-06-10-https-profile-images.md",
         "docs/plans/2026-06-12-album-art-connection-guard.md",
         "docs/plans/2026-06-12-checkout-credential-boundary.md",
+        "docs/plans/2026-06-14-rdio-error-redaction.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -500,6 +508,12 @@ def main() -> int:
         failures.append("CHANGES must record local editor metadata guardrails")
     if "twitter authorization origin guard" not in changes.lower():
         failures.append("CHANGES must record the Twitter authorization origin guard")
+    for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
+        if "rdio authorization error redaction" not in read_text(relative_path).lower():
+            failures.append(f"{relative_path} must document Rdio authorization error redaction")
+    rdio_error_plan = read_text("docs/plans/2026-06-14-rdio-error-redaction.md")
+    if "status: completed" not in rdio_error_plan or "Five isolated hostile mutations were rejected" not in rdio_error_plan:
+        failures.append("Rdio authorization error redaction plan must record completed verification")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

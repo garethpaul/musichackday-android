@@ -61,6 +61,8 @@ Helpful reports include:
   active request token before requesting Twitter access tokens.
 - Sanitized OAuth error logging should keep Twitter login failure logs at
   action-level messages without exception details or stack traces.
+- Rdio authorization error redaction should keep cancelled SDK diagnostics out
+  of application logs.
 - The Twitter authorization origin guard should require the canonical HTTPS
   Twitter host, default port, and authenticate path before launching an
   external browser.

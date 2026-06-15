@@ -70,6 +70,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-15-rdio-authorization-flow-guard.md",
     "docs/plans/2026-06-15-twitter-search-view-lookup-ui-thread.md",
     "docs/plans/2026-06-15-twitter-callback-inflight-guard.md",
+    "docs/plans/2026-06-15-twitter-callback-state-snapshot.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -269,7 +270,7 @@ def main() -> int:
         or "new Intent(Intent.ACTION_VIEW, authenticationUri)" not in main_activity
     ):
         failures.append("MainActivity must restrict outbound Twitter authorization to the canonical HTTPS origin")
-    token_exchange = main_activity.split("accessToken = twitter.getOAuthAccessToken", 1)[1].split("} catch (Exception e)", 1)[0]
+    token_exchange = main_activity.split("accessToken = callbackTwitter.getOAuthAccessToken", 1)[1].split("} catch (Exception e)", 1)[0]
     token_handoff_index = token_exchange.find("MainActivity.this.runOnUiThread(new Runnable()")
     token_navigation_index = token_exchange.find("startActivity(myIntent)")
     authorization_thread = main_activity.split("requestToken = twitter", 1)[1].split("} catch (Exception e)", 1)[0]
@@ -280,6 +281,8 @@ def main() -> int:
         failures.append("Twitter access-token success navigation must run on the activity UI thread")
     callback_block = main_activity.split("if (isTwitterCallback(uri))", 1)[1].split("private boolean isTwitterLoggedInAlready()", 1)[0]
     callback_validation_index = callback_block.find("!matchesRequestToken(callbackToken, requestToken)")
+    callback_twitter_snapshot_index = callback_block.find("final Twitter callbackTwitter = twitter")
+    callback_token_snapshot_index = callback_block.find("final RequestToken callbackRequestToken = requestToken")
     callback_guard_index = callback_block.find("if (twitterCallbackExchangeInFlight)")
     callback_acquire_index = callback_block.find("twitterCallbackExchangeInFlight = true")
     callback_thread_index = callback_block.find("Thread thread = new Thread")
@@ -291,9 +294,16 @@ def main() -> int:
     callback_setup_release_index = callback_block.rfind("finishTwitterCallbackExchange()", 0, callback_setup_failure_index)
     if not (
         "private static boolean twitterCallbackExchangeInFlight;" in main_activity
-        and 0 <= callback_validation_index < callback_guard_index < callback_acquire_index < callback_thread_index
+        and 0 <= callback_validation_index < callback_twitter_snapshot_index < callback_token_snapshot_index
+        and callback_token_snapshot_index < callback_guard_index < callback_acquire_index < callback_thread_index
     ):
         failures.append("Twitter callbacks must reject overlapping access-token exchanges after identity validation")
+    if (
+        "accessToken = callbackTwitter.getOAuthAccessToken(\n                                        callbackRequestToken, verifier);" not in callback_block
+        or "accessToken = twitter.getOAuthAccessToken" in callback_block
+        or "accessToken = callbackTwitter.getOAuthAccessToken(\n                                        requestToken, verifier);" in callback_block
+    ):
+        failures.append("Twitter callback workers must exchange only the validated OAuth state snapshots")
     if not (
         0 <= callback_success_release_index < callback_success_navigation_index
         and 0 <= callback_worker_release_index < callback_worker_failure_index
@@ -306,7 +316,7 @@ def main() -> int:
     ):
         failures.append("Twitter authorization browser navigation must run on the UI thread after origin validation")
     login_method = main_activity.split("private void loginToTwitter()", 1)[1].split("private void finishTwitterLoginAttempt()", 1)[0]
-    login_guard_index = login_method.find("if (twitterLoginInFlight)")
+    login_guard_index = login_method.find("if (twitterCallbackExchangeInFlight || twitterLoginInFlight)")
     login_acquire_index = login_method.find("twitterLoginInFlight = true")
     login_thread_index = login_method.find("Thread thread = new Thread")
     invalid_origin_index = login_method.find("if (!isTrustedTwitterAuthenticationUri(authenticationUri))")
@@ -633,6 +643,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document the Twitter authorization origin guard")
         if "twitter login in-flight guard" not in text.lower():
             failures.append(f"{relative_path} must document the Twitter login in-flight guard")
+        if "twitter callback state snapshot" not in text.lower():
+            failures.append(f"{relative_path} must document the Twitter callback state snapshot")
         if "rdio authorization flow guard" not in text.lower():
             failures.append(f"{relative_path} must document the Rdio authorization flow guard")
         if "twitter search view lookup ui thread" not in text.lower():
@@ -741,6 +753,16 @@ def main() -> int:
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
         if "twitter callback exchange in-flight guard" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document the Twitter callback exchange in-flight guard")
+    callback_snapshot_plan = read_text("docs/plans/2026-06-15-twitter-callback-state-snapshot.md")
+    callback_snapshot_verification = markdown_section(callback_snapshot_plan, "Verification Completed")
+    if (
+        "status: completed" not in callback_snapshot_plan.lower()
+        or "All four Make gates passed" not in callback_snapshot_verification
+        or "Seven isolated hostile mutations were rejected" not in callback_snapshot_verification
+        or "external directory" not in callback_snapshot_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", callback_snapshot_verification)
+    ):
+        failures.append("Twitter callback state snapshot plan must record completed verification")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

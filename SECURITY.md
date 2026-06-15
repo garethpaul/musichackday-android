@@ -99,6 +99,8 @@ Twitter login in-flight guard reports should include whether repeated taps can
 start overlapping request-token workers or replace the active callback token.
 Twitter callback exchange in-flight guard reports should include whether
 activity recreation can exchange the same valid request token concurrently.
+Twitter callback state snapshot reports should include whether a new login can
+replace validated OAuth dependencies before verifier exchange completes.
 
 Rdio authorization flow guard reports should include whether startup can open
 multiple OAuth activities or canceled and malformed results can prepare playback.

@@ -85,6 +85,8 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(MainActivity.this, "Twitter login was not started on this device.", Toast.LENGTH_LONG).show();
                     return;
                 }
+                final Twitter callbackTwitter = twitter;
+                final RequestToken callbackRequestToken = requestToken;
                 if (twitterCallbackExchangeInFlight) {
                     return;
                 }
@@ -98,8 +100,8 @@ public class MainActivity extends ActionBarActivity {
                             try {
 
                                 // Get the access token
-                                accessToken = twitter.getOAuthAccessToken(
-                                        requestToken, verifier);
+                                accessToken = callbackTwitter.getOAuthAccessToken(
+                                        callbackRequestToken, verifier);
                                 // Shared Preferences
                                 mSharedPreferences = getApplicationContext().getSharedPreferences(
                                         "twitter4j-sample", 0);
@@ -212,7 +214,7 @@ public class MainActivity extends ActionBarActivity {
     private void loginToTwitter() {
         // Check if already logged in
         if (!isTwitterLoggedInAlready()) {
-            if (twitterLoginInFlight) {
+            if (twitterCallbackExchangeInFlight || twitterLoginInFlight) {
                 return;
             }
             twitterLoginInFlight = true;

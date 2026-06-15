@@ -10,6 +10,8 @@
   adapter installation remain inside the activity's main-thread handoff.
 - Added a Twitter callback exchange in-flight guard so activity recreation
   cannot exchange the same valid request token concurrently.
+- Added a Twitter callback state snapshot so verifier exchange retains the
+  validated client and request token while new login attempts remain blocked.
 - Added a Rdio authorization flow guard to prevent duplicate OAuth activities
   and reject canceled or incomplete credentials before playback preparation.
 

@@ -63,6 +63,8 @@ Helpful reports include:
   action-level messages without exception details or stack traces.
 - Rdio authorization error redaction should keep cancelled SDK diagnostics out
   of application logs.
+- The Rdio authorization flow guard should reject overlapping OAuth launches
+  and fail closed before playback preparation when credentials are incomplete.
 - The Twitter authorization origin guard should require the canonical HTTPS
   Twitter host, default port, and authenticate path before launching an
   external browser.
@@ -93,6 +95,9 @@ Twitter navigation UI thread handoff reports should include whether either OAuth
 worker can launch an activity without returning to Android's main thread.
 Twitter login in-flight guard reports should include whether repeated taps can
 start overlapping request-token workers or replace the active callback token.
+
+Rdio authorization flow guard reports should include whether startup can open
+multiple OAuth activities or canceled and malformed results can prepare playback.
 
 ## Dependency and Supply Chain Security
 

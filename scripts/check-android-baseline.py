@@ -67,6 +67,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-14-twitter-search-failure-guard.md",
     "docs/plans/2026-06-15-twitter-navigation-ui-thread.md",
     "docs/plans/2026-06-15-twitter-login-inflight-guard.md",
+    "docs/plans/2026-06-15-rdio-authorization-flow-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -335,6 +336,54 @@ def main() -> int:
         or 'Log.v(TAG, "ERROR: "' in rdio_app
     ):
         failures.append("Rdio authorization errors must use sanitized action-level logging")
+    rdio_authorization_method = rdio_app.split(
+        "private void startRdioAuthorization()", 1
+    )[1].split("private boolean hasRdioCredential", 1)[0]
+    rdio_launch_guard_index = rdio_authorization_method.find("if (rdioAuthorizationInFlight)")
+    rdio_launch_acquire_index = rdio_authorization_method.find("rdioAuthorizationInFlight = true")
+    rdio_launch_index = rdio_authorization_method.find(
+        "startActivityForResult(authorizationIntent, RDIO_AUTHORIZATION_REQUEST)"
+    )
+    if not (
+        "private boolean rdioAuthorizationInFlight;" in rdio_app
+        and "private static final int RDIO_AUTHORIZATION_REQUEST = 1;" in rdio_app
+        and "STATE_RDIO_AUTHORIZATION_IN_FLIGHT" in rdio_app
+        and "savedInstanceState.getBoolean(STATE_RDIO_AUTHORIZATION_IN_FLIGHT, false)" in rdio_app
+        and "outState.putBoolean(STATE_RDIO_AUTHORIZATION_IN_FLIGHT, rdioAuthorizationInFlight)" in rdio_app
+        and "rdio.cleanup();\n            rdio = null;" in rdio_app
+        and rdio_app.count("startRdioAuthorization();") == 2
+        and rdio_app.count("startActivityForResult(") == 1
+        and 0 <= rdio_launch_guard_index < rdio_launch_acquire_index < rdio_launch_index
+        and "rdioAuthorizationInFlight = false;" in rdio_authorization_method
+    ):
+        failures.append("Rdio authorization launches must be centralized and reject overlap")
+    rdio_result_method = rdio_app.split(
+        "public void onActivityResult(int requestCode, int resultCode, Intent data)", 1
+    )[1].split("private void startRdioAuthorization()", 1)[0]
+    rdio_result_release_index = rdio_result_method.find("rdioAuthorizationInFlight = false")
+    rdio_result_status_guard_index = rdio_result_method.find(
+        "if (resultCode != RESULT_OK || data == null)"
+    )
+    rdio_result_token_index = rdio_result_method.find(
+        'String returnedToken = data.getStringExtra("token")'
+    )
+    rdio_result_token_guard_index = rdio_result_method.find(
+        "if (!hasRdioCredential(returnedToken) || !hasRdioCredential(returnedTokenSecret))"
+    )
+    rdio_result_install_index = rdio_result_method.find(
+        "rdio.setTokenAndSecret(accessToken, accessTokenSecret)"
+    )
+    rdio_result_prepare_index = rdio_result_method.find("rdio.prepareForPlayback()")
+    if not (
+        0 <= rdio_result_release_index < rdio_result_status_guard_index
+        < rdio_result_token_index < rdio_result_token_guard_index
+        < rdio_result_install_index < rdio_result_prepare_index
+        and rdio_result_method.count("return;") >= 3
+        and rdio_result_method.count('Log.w(TAG, "Rdio authorization failed")') == 2
+        and "value != null && value.trim().length() > 0" in rdio_app
+        and rdio_result_method.count("rdio.prepareForPlayback()") == 1
+    ):
+        failures.append("Rdio authorization results must validate both credentials before playback preparation")
     if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
         failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
     search_task = rdio_app.split("private class getSearch", 1)[1]
@@ -551,6 +600,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document the Twitter authorization origin guard")
         if "twitter login in-flight guard" not in text.lower():
             failures.append(f"{relative_path} must document the Twitter login in-flight guard")
+        if "rdio authorization flow guard" not in text.lower():
+            failures.append(f"{relative_path} must document the Rdio authorization flow guard")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -577,6 +628,8 @@ def main() -> int:
         failures.append("CHANGES must record local editor metadata guardrails")
     if "twitter authorization origin guard" not in changes.lower():
         failures.append("CHANGES must record the Twitter authorization origin guard")
+    if "rdio authorization flow guard" not in changes.lower():
+        failures.append("CHANGES must record the Rdio authorization flow guard")
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
         if "twitter search failure guard" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document the Twitter search failure guard")
@@ -618,6 +671,16 @@ def main() -> int:
     rdio_error_plan = read_text("docs/plans/2026-06-14-rdio-error-redaction.md")
     if "status: completed" not in rdio_error_plan or "Five isolated hostile mutations were rejected" not in rdio_error_plan:
         failures.append("Rdio authorization error redaction plan must record completed verification")
+    rdio_flow_plan = read_text("docs/plans/2026-06-15-rdio-authorization-flow-guard.md")
+    rdio_flow_verification = markdown_section(rdio_flow_plan, "Verification Completed")
+    if (
+        "status: completed" not in rdio_flow_plan.lower()
+        or "All four Make gates passed" not in rdio_flow_verification
+        or "Eight isolated hostile mutations were rejected" not in rdio_flow_verification
+        or "external directory" not in rdio_flow_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", rdio_flow_verification)
+    ):
+        failures.append("Rdio authorization flow guard plan must record completed verification")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

@@ -102,6 +102,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   messages without exception details or stack traces.
 - Rdio authorization error redaction keeps cancelled SDK diagnostics out of
   application logs while preserving token cleanup.
+- The Rdio authorization flow guard prevents duplicate OAuth activities and
+  prepares playback only after both returned credentials are nonblank.
 - The Twitter search failure guard keeps raw queries and provider stack traces
   out of logs and returns before iterating a failed result.
 - The Twitter navigation UI thread handoff keeps OAuth browser and post-login
@@ -139,6 +141,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   do not write provider exception details to Android logs.
 - Keep the Twitter search failure guard fail-closed before result iteration.
 - Keep the Twitter navigation UI thread handoff around both worker success paths.
+- Keep the Rdio authorization flow guard around every OAuth launch and result.
 - Keep the Twitter authorization origin guard in place so library or
   configuration drift cannot launch login on an alternate scheme or origin.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.

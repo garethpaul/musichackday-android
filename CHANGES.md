@@ -6,6 +6,8 @@
   post-token activity launches from OAuth workers.
 - Added a Twitter login in-flight guard so repeated taps cannot start
   overlapping request-token workers or duplicate browser navigation.
+- Added a Rdio authorization flow guard to prevent duplicate OAuth activities
+  and reject canceled or incomplete credentials before playback preparation.
 
 ## 2026-06-14
 

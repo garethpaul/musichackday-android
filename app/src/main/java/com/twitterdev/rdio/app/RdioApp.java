@@ -109,8 +109,12 @@ public class RdioApp extends Activity implements RdioListener {
 
     private static String accessToken = null;
     private static String accessTokenSecret = null;
+    private boolean rdioAuthorizationInFlight;
     protected ImageLoader imageLoader;
 
+    private static final int RDIO_AUTHORIZATION_REQUEST = 1;
+    private static final String STATE_RDIO_AUTHORIZATION_IN_FLIGHT =
+            "state.rdio.authorization.in_flight";
     private static final String PREF_ACCESSTOKEN = "prefs.accesstoken";
     private static final String PREF_ACCESSTOKENSECRET = "prefs.accesstokensecret";
 
@@ -159,6 +163,8 @@ public class RdioApp extends Activity implements RdioListener {
         List<String> where = new ArrayList<String>();
 
         super.onCreate(savedInstanceState);
+        rdioAuthorizationInFlight = savedInstanceState != null
+                && savedInstanceState.getBoolean(STATE_RDIO_AUTHORIZATION_IN_FLIGHT, false);
         setContentView(R.layout.main);
 
         trackQueue = new LinkedList<Track>();
@@ -176,11 +182,7 @@ public class RdioApp extends Activity implements RdioListener {
             if (accessToken == null || accessTokenSecret == null) {
                 // If either one is null, reset both of them
                 accessToken = accessTokenSecret = null;
-                Intent myIntent = new Intent(RdioApp.this,
-                        OAuth1WebViewActivity.class);
-                myIntent.putExtra(OAuth1WebViewActivity.EXTRA_CONSUMER_KEY, Constants.appKey);
-                myIntent.putExtra(OAuth1WebViewActivity.EXTRA_CONSUMER_SECRET, Constants.appSecret);
-                RdioApp.this.startActivityForResult(myIntent, 1);
+                startRdioAuthorization();
 
             } else {
                 Log.d(TAG, "Found cached credentials.");
@@ -210,12 +212,19 @@ public class RdioApp extends Activity implements RdioListener {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(STATE_RDIO_AUTHORIZATION_IN_FLIGHT, rdioAuthorizationInFlight);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onDestroy() {
         Log.i(TAG, "Cleaning up..");
 
         // Make sure to call the cleanup method on the API object
         if (rdio != null) {
             rdio.cleanup();
+            rdio = null;
         }
 
         // If we allocated a player, then cleanup after it
@@ -244,11 +253,7 @@ public class RdioApp extends Activity implements RdioListener {
 
             // Then helpfully point them to the market to go install Rdio ;)
             accessToken = accessTokenSecret = null;
-            Intent myIntent = new Intent(RdioApp.this,
-                    OAuth1WebViewActivity.class);
-            myIntent.putExtra(OAuth1WebViewActivity.EXTRA_CONSUMER_KEY, Constants.appKey);
-            myIntent.putExtra(OAuth1WebViewActivity.EXTRA_CONSUMER_SECRET, Constants.appSecret);
-            RdioApp.this.startActivityForResult(myIntent, 1);
+            startRdioAuthorization();
 
             //finish();
             return;
@@ -507,24 +512,58 @@ public class RdioApp extends Activity implements RdioListener {
      *************************/
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                Log.v(TAG, "Login success");
-                if (data != null) {
-                    accessToken = data.getStringExtra("token");
-                    accessTokenSecret = data.getStringExtra("tokenSecret");
-                    onRdioAuthorised(accessToken, accessTokenSecret);
-                    rdio.setTokenAndSecret(accessToken, accessTokenSecret);
-                }
-            } else if (resultCode == RESULT_CANCELED) {
-                if (data != null) {
-                    Log.w(TAG, "Rdio authorization failed");
-                }
-                accessToken = null;
-                accessTokenSecret = null;
-            }
-            rdio.prepareForPlayback();
+        if (requestCode != RDIO_AUTHORIZATION_REQUEST) {
+            super.onActivityResult(requestCode, resultCode, data);
+            return;
         }
+
+        rdioAuthorizationInFlight = false;
+        if (resultCode != RESULT_OK || data == null) {
+            clearRdioCredentials();
+            Log.w(TAG, "Rdio authorization failed");
+            return;
+        }
+
+        String returnedToken = data.getStringExtra("token");
+        String returnedTokenSecret = data.getStringExtra("tokenSecret");
+        if (!hasRdioCredential(returnedToken) || !hasRdioCredential(returnedTokenSecret)) {
+            clearRdioCredentials();
+            Log.w(TAG, "Rdio authorization failed");
+            return;
+        }
+
+        accessToken = returnedToken;
+        accessTokenSecret = returnedTokenSecret;
+        onRdioAuthorised(accessToken, accessTokenSecret);
+        rdio.setTokenAndSecret(accessToken, accessTokenSecret);
+        rdio.prepareForPlayback();
+    }
+
+    private void startRdioAuthorization() {
+        if (rdioAuthorizationInFlight) {
+            return;
+        }
+
+        rdioAuthorizationInFlight = true;
+        Intent authorizationIntent = new Intent(RdioApp.this,
+                OAuth1WebViewActivity.class);
+        authorizationIntent.putExtra(OAuth1WebViewActivity.EXTRA_CONSUMER_KEY, Constants.appKey);
+        authorizationIntent.putExtra(OAuth1WebViewActivity.EXTRA_CONSUMER_SECRET, Constants.appSecret);
+        try {
+            RdioApp.this.startActivityForResult(authorizationIntent, RDIO_AUTHORIZATION_REQUEST);
+        } catch (RuntimeException exception) {
+            rdioAuthorizationInFlight = false;
+            Log.w(TAG, "Rdio authorization could not start");
+        }
+    }
+
+    private boolean hasRdioCredential(String value) {
+        return value != null && value.trim().length() > 0;
+    }
+
+    private void clearRdioCredentials() {
+        accessToken = null;
+        accessTokenSecret = null;
     }
 
     /*************************

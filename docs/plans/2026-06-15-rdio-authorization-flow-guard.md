@@ -1,6 +1,6 @@
 # Guard the Rdio Authorization Flow
 
-status: planned
+status: completed
 
 ## Problem
 
@@ -15,6 +15,8 @@ data, even though no valid credential pair was established.
 
 - Route every Rdio authorization launch through one helper with an explicit
   in-flight guard.
+- Preserve in-flight ownership across activity recreation while the OAuth
+  activity is returning.
 - Mark authorization in flight before launching and clear it for every returned
   result.
 - Accept a successful result only when both token extras are present and
@@ -80,3 +82,32 @@ fail-closed preparation, completed evidence, and maintenance documentation.
 - Authorization cancellation remains recoverable through the next explicit
   playback attempt because the in-flight flag is cleared on result.
 - The stacked base pull request must remain available and merge first.
+
+## Work Completed
+
+- Added one guarded Rdio authorization launcher and routed both startup and
+  queue-depletion paths through it.
+- Saved and restored authorization ownership across activity recreation.
+- Cleared the static SDK reference after lifecycle cleanup so recreation builds
+  a live Rdio instance instead of reusing a cleaned object.
+- Cleared authorization ownership at the result boundary and on launch failure.
+- Rejected cancellation, missing result data, and blank token pairs before
+  persistence, SDK credential installation, or playback preparation.
+- Preserved cached-credential startup, the existing SDK request code and intent
+  extras, anonymous fallback behavior, dependencies, and Twitter flows.
+- Added portable static contracts and project guidance for launch ownership and
+  fail-closed result handling.
+
+## Verification Completed
+
+- The checker compiled and passed. All four Make gates passed from the checkout,
+  and the canonical check passed from an external directory through the absolute
+  Makefile path.
+- Eight isolated hostile mutations were rejected: bypassed launch helper,
+  removed in-flight guard, dropped recreation state, retained a cleaned SDK
+  reference, accepted blank tokens, prepared playback after failure, removed
+  guidance, and stale plan status.
+- `git diff --check`, exact intended-path, Java/checker structure,
+  Gradle/project integrity, generated-artifact, credential-pattern,
+  conflict-marker, binary, and large-file audits passed.
+- No live Twitter, Rdio, OAuth, media, or other external service was contacted.

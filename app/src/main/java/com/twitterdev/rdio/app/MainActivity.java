@@ -108,8 +108,13 @@ public class MainActivity extends ActionBarActivity {
                                 e.putBoolean(Constants.PREF_KEY_TWITTER_LOGIN, true);
                                 e.commit(); // save changes
 
-                                Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
-                                startActivity(myIntent);
+                                MainActivity.this.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
+                                        startActivity(myIntent);
+                                    }
+                                });
 
                                 // Hide login button
                             } catch (Exception e) {
@@ -208,12 +213,17 @@ public class MainActivity extends ActionBarActivity {
 
                         requestToken = twitter
                                 .getOAuthRequestToken(Constants.CALLBACKURL);
-                        Uri authenticationUri = Uri.parse(requestToken.getAuthenticationURL());
+                        final Uri authenticationUri = Uri.parse(requestToken.getAuthenticationURL());
                         if (!isTrustedTwitterAuthenticationUri(authenticationUri)) {
                             logTwitterLoginFailure("Authorization URL validation");
                             return;
                         }
-                        MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri));
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri));
+                            }
+                        });
 
                     } catch (Exception e) {
                         logTwitterLoginFailure("Request token creation");

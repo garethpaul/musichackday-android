@@ -65,6 +65,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-13-location-independent-make.md",
     "docs/plans/2026-06-14-twitter-authorization-origin-guard.md",
     "docs/plans/2026-06-14-twitter-search-failure-guard.md",
+    "docs/plans/2026-06-15-twitter-navigation-ui-thread.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -264,6 +265,19 @@ def main() -> int:
         or "new Intent(Intent.ACTION_VIEW, authenticationUri)" not in main_activity
     ):
         failures.append("MainActivity must restrict outbound Twitter authorization to the canonical HTTPS origin")
+    token_exchange = main_activity.split("accessToken = twitter.getOAuthAccessToken", 1)[1].split("} catch (Exception e)", 1)[0]
+    token_handoff_index = token_exchange.find("MainActivity.this.runOnUiThread(new Runnable()")
+    token_navigation_index = token_exchange.find("startActivity(myIntent)")
+    authorization_thread = main_activity.split("requestToken = twitter", 1)[1].split("} catch (Exception e)", 1)[0]
+    authorization_validation_index = authorization_thread.find("if (!isTrustedTwitterAuthenticationUri(authenticationUri))")
+    authorization_handoff_index = authorization_thread.find("MainActivity.this.runOnUiThread(new Runnable()")
+    authorization_navigation_index = authorization_thread.find("MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri))")
+    if not (0 <= token_handoff_index < token_navigation_index):
+        failures.append("Twitter access-token success navigation must run on the activity UI thread")
+    if not (
+        0 <= authorization_validation_index < authorization_handoff_index < authorization_navigation_index
+    ):
+        failures.append("Twitter authorization browser navigation must run on the UI thread after origin validation")
 
     file_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/FileCache.java")
     if "context.getCacheDir()" not in file_cache:
@@ -530,6 +544,8 @@ def main() -> int:
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
         if "twitter search failure guard" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document the Twitter search failure guard")
+        if "twitter navigation ui thread handoff" not in read_text(relative_path).lower():
+            failures.append(f"{relative_path} must document the Twitter navigation UI thread handoff")
     search_failure_plan = read_text("docs/plans/2026-06-14-twitter-search-failure-guard.md")
     search_failure_verification = markdown_section(search_failure_plan, "Verification Completed")
     if (
@@ -540,6 +556,16 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", search_failure_verification)
     ):
         failures.append("Twitter search failure guard plan must record completed verification")
+    navigation_plan = read_text("docs/plans/2026-06-15-twitter-navigation-ui-thread.md")
+    navigation_verification = markdown_section(navigation_plan, "Verification Completed")
+    if (
+        "status: completed" not in navigation_plan
+        or "All four Make gates passed" not in navigation_verification
+        or "Six isolated hostile mutations were rejected" not in navigation_verification
+        or "external directory" not in navigation_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", navigation_verification)
+    ):
+        failures.append("Twitter navigation UI thread handoff plan must record completed verification")
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
         if "rdio authorization error redaction" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document Rdio authorization error redaction")

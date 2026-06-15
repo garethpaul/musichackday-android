@@ -1,6 +1,6 @@
 # Twitter Navigation UI Thread Handoff
 
-status: in progress
+status: completed
 
 ## Context
 
@@ -45,8 +45,24 @@ race with UI lifecycle work when invoked from a worker.
 
 ## Work Completed
 
-- Pending implementation.
+- Dispatched both successful OAuth worker navigation paths through
+  `MainActivity.this.runOnUiThread`.
+- Kept authorization-origin validation before browser navigation and kept token
+  exchange and preference storage on the worker thread.
+- Kept each intent construction and `startActivity` call together in its UI
+  runnable.
+- Added method-scoped static contracts and maintenance guidance.
 
 ## Verification Completed
 
-- Pending validation.
+- All four Make gates passed from the checkout, and the rooted canonical gate
+  passed from an external directory through the absolute Makefile path.
+- Six isolated hostile mutations were rejected: missing token-success handoff,
+  missing authorization-browser handoff, token navigation before its handoff,
+  bypassed authorization-origin validation, missing guidance, and stale plan
+  status.
+- Checker compilation and `git diff --check` passed. Exact intended-path,
+  generated-artifact, secret-pattern, conflict-marker, binary, and large-file
+  audits found no issues.
+- Android SDK, Gradle, emulator, device, Twitter, and Rdio execution were not
+  available or contacted; native runtime behavior is not claimed.

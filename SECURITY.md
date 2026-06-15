@@ -89,6 +89,9 @@ Twitter search reports should include whether the Twitter search failure guard
 can be bypassed to log raw queries, provider stack traces, or iterate a failed
 result.
 
+Twitter navigation UI thread handoff reports should include whether either OAuth
+worker can launch an activity without returning to Android's main thread.
+
 ## Dependency and Supply Chain Security
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, signing material, generated Android packages, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.

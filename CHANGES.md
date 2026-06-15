@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-15
+
+- Added a Twitter navigation UI thread handoff for authorization-browser and
+  post-token activity launches from OAuth workers.
+
 ## 2026-06-14
 
 - Added a Twitter search failure guard that redacts query/provider diagnostics

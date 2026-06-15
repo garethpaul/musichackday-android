@@ -104,6 +104,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   application logs while preserving token cleanup.
 - The Twitter search failure guard keeps raw queries and provider stack traces
   out of logs and returns before iterating a failed result.
+- The Twitter navigation UI thread handoff keeps OAuth browser and post-login
+  activity launches on Android's main thread.
 - The Twitter authorization origin guard launches the browser only for the
   canonical HTTPS `api.twitter.com/oauth/authenticate` endpoint on its default
   port.
@@ -134,6 +136,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep sanitized OAuth error logging in place so failed Twitter login attempts
   do not write provider exception details to Android logs.
 - Keep the Twitter search failure guard fail-closed before result iteration.
+- Keep the Twitter navigation UI thread handoff around both worker success paths.
 - Keep the Twitter authorization origin guard in place so library or
   configuration drift cannot launch login on an alternate scheme or origin.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.

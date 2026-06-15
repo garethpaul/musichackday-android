@@ -36,6 +36,7 @@ public class MainActivity extends ActionBarActivity {
     private static SharedPreferences mSharedPreferences;
     private static Twitter twitter;
     private static RequestToken requestToken;
+    private static boolean twitterCallbackExchangeInFlight;
     private AccessToken accessToken;
     private boolean twitterLoginInFlight;
 
@@ -84,6 +85,10 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(MainActivity.this, "Twitter login was not started on this device.", Toast.LENGTH_LONG).show();
                     return;
                 }
+                if (twitterCallbackExchangeInFlight) {
+                    return;
+                }
+                twitterCallbackExchangeInFlight = true;
 
                 try {
 
@@ -112,6 +117,7 @@ public class MainActivity extends ActionBarActivity {
                                 MainActivity.this.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        twitterCallbackExchangeInFlight = false;
                                         Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
                                         startActivity(myIntent);
                                     }
@@ -119,6 +125,7 @@ public class MainActivity extends ActionBarActivity {
 
                                 // Hide login button
                             } catch (Exception e) {
+                                finishTwitterCallbackExchange();
                                 logTwitterLoginFailure("Access token exchange");
                             }
                         }
@@ -128,6 +135,7 @@ public class MainActivity extends ActionBarActivity {
 
 
                 } catch (Exception e) {
+                    finishTwitterCallbackExchange();
                     logTwitterLoginFailure("OAuth callback handling");
                 }
             }
@@ -181,6 +189,15 @@ public class MainActivity extends ActionBarActivity {
 
         String expectedToken = activeRequestToken.getToken();
         return expectedToken != null && expectedToken.equals(callbackToken);
+    }
+
+    private void finishTwitterCallbackExchange() {
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                twitterCallbackExchangeInFlight = false;
+            }
+        });
     }
 
     private boolean isTrustedTwitterAuthenticationUri(Uri uri) {

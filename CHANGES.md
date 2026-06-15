@@ -8,6 +8,8 @@
   overlapping request-token workers or duplicate browser navigation.
 - Added a Twitter search view lookup UI thread rule so result-list lookup and
   adapter installation remain inside the activity's main-thread handoff.
+- Added a Twitter callback exchange in-flight guard so activity recreation
+  cannot exchange the same valid request token concurrently.
 - Added a Rdio authorization flow guard to prevent duplicate OAuth activities
   and reject canceled or incomplete credentials before playback preparation.
 

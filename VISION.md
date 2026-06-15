@@ -42,6 +42,7 @@ Priority:
 - Keep the Twitter search view lookup UI thread rule around result rendering
 - Keep the Twitter navigation UI thread handoff around OAuth activity launches
 - Keep the Twitter login in-flight guard ahead of request-token worker creation
+- Keep the Twitter callback exchange in-flight guard across activity recreation
 - Keep the Twitter authorization origin guard before browser launch
 - Keep local editor metadata out of the shared Android project baseline
 - Keep legacy build coordinates pinned for reproducible archaeology

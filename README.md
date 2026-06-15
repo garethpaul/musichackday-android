@@ -112,6 +112,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   activity launches on Android's main thread.
 - The Twitter login in-flight guard rejects repeated taps while request-token
   creation is active and releases ownership on every terminal path.
+- The Twitter callback exchange in-flight guard rejects duplicate valid OAuth
+  callbacks across activity recreation until the active exchange finishes.
 - The Twitter authorization origin guard launches the browser only for the
   canonical HTTPS `api.twitter.com/oauth/authenticate` endpoint on its default
   port.
@@ -144,6 +146,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep the Twitter search failure guard fail-closed before result iteration.
 - Keep the Twitter search view lookup UI thread rule around result rendering.
 - Keep the Twitter navigation UI thread handoff around both worker success paths.
+- Keep the Twitter callback exchange in-flight guard around access-token work.
 - Keep the Rdio authorization flow guard around every OAuth launch and result.
 - Keep the Twitter authorization origin guard in place so library or
   configuration drift cannot launch login on an alternate scheme or origin.

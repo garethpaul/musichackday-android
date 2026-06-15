@@ -68,6 +68,8 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-15-twitter-navigation-ui-thread.md",
     "docs/plans/2026-06-15-twitter-login-inflight-guard.md",
     "docs/plans/2026-06-15-rdio-authorization-flow-guard.md",
+    "docs/plans/2026-06-15-twitter-search-view-lookup-ui-thread.md",
+    "docs/plans/2026-06-15-twitter-callback-inflight-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -276,6 +278,29 @@ def main() -> int:
     authorization_navigation_index = authorization_thread.find("MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri))")
     if not (0 <= token_handoff_index < token_navigation_index):
         failures.append("Twitter access-token success navigation must run on the activity UI thread")
+    callback_block = main_activity.split("if (isTwitterCallback(uri))", 1)[1].split("private boolean isTwitterLoggedInAlready()", 1)[0]
+    callback_validation_index = callback_block.find("!matchesRequestToken(callbackToken, requestToken)")
+    callback_guard_index = callback_block.find("if (twitterCallbackExchangeInFlight)")
+    callback_acquire_index = callback_block.find("twitterCallbackExchangeInFlight = true")
+    callback_thread_index = callback_block.find("Thread thread = new Thread")
+    callback_success_release_index = callback_block.find("twitterCallbackExchangeInFlight = false", callback_thread_index)
+    callback_success_navigation_index = callback_block.find("startActivity(myIntent)", callback_success_release_index)
+    callback_worker_failure_index = callback_block.find('logTwitterLoginFailure("Access token exchange")')
+    callback_worker_release_index = callback_block.rfind("finishTwitterCallbackExchange()", 0, callback_worker_failure_index)
+    callback_setup_failure_index = callback_block.find('logTwitterLoginFailure("OAuth callback handling")')
+    callback_setup_release_index = callback_block.rfind("finishTwitterCallbackExchange()", 0, callback_setup_failure_index)
+    if not (
+        "private static boolean twitterCallbackExchangeInFlight;" in main_activity
+        and 0 <= callback_validation_index < callback_guard_index < callback_acquire_index < callback_thread_index
+    ):
+        failures.append("Twitter callbacks must reject overlapping access-token exchanges after identity validation")
+    if not (
+        0 <= callback_success_release_index < callback_success_navigation_index
+        and 0 <= callback_worker_release_index < callback_worker_failure_index
+        and callback_worker_failure_index < callback_setup_release_index < callback_setup_failure_index
+        and "private void finishTwitterCallbackExchange()" in main_activity
+    ):
+        failures.append("Twitter callback exchange ownership must release on every terminal path")
     if not (
         0 <= authorization_validation_index < authorization_handoff_index < authorization_navigation_index
     ):
@@ -703,6 +728,19 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", search_view_verification)
     ):
         failures.append("Twitter search view lookup UI thread plan must record completed verification")
+    callback_inflight_plan = read_text("docs/plans/2026-06-15-twitter-callback-inflight-guard.md")
+    callback_inflight_verification = markdown_section(callback_inflight_plan, "Verification Completed")
+    if (
+        "status: completed" not in callback_inflight_plan.lower()
+        or "All four Make gates passed" not in callback_inflight_verification
+        or "Eight isolated hostile mutations were rejected" not in callback_inflight_verification
+        or "external directory" not in callback_inflight_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", callback_inflight_verification)
+    ):
+        failures.append("Twitter callback exchange in-flight guard plan must record completed verification")
+    for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
+        if "twitter callback exchange in-flight guard" not in read_text(relative_path).lower():
+            failures.append(f"{relative_path} must document the Twitter callback exchange in-flight guard")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

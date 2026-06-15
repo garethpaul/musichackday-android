@@ -106,6 +106,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   prepares playback only after both returned credentials are nonblank.
 - The Twitter search failure guard keeps raw queries and provider stack traces
   out of logs and returns before iterating a failed result.
+- The Twitter search view lookup UI thread rule keeps result-list lookup and
+  adapter installation inside the activity's main-thread handoff.
 - The Twitter navigation UI thread handoff keeps OAuth browser and post-login
   activity launches on Android's main thread.
 - The Twitter login in-flight guard rejects repeated taps while request-token
@@ -140,6 +142,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep sanitized OAuth error logging in place so failed Twitter login attempts
   do not write provider exception details to Android logs.
 - Keep the Twitter search failure guard fail-closed before result iteration.
+- Keep the Twitter search view lookup UI thread rule around result rendering.
 - Keep the Twitter navigation UI thread handoff around both worker success paths.
 - Keep the Rdio authorization flow guard around every OAuth launch and result.
 - Keep the Twitter authorization origin guard in place so library or

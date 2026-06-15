@@ -90,6 +90,8 @@ be bypassed to write provider exception details or stack traces.
 Twitter search reports should include whether the Twitter search failure guard
 can be bypassed to log raw queries, provider stack traces, or iterate a failed
 result.
+Twitter search view lookup UI thread reports should include whether result-list
+lookup or adapter installation can escape the activity's main-thread handoff.
 
 Twitter navigation UI thread handoff reports should include whether either OAuth
 worker can launch an activity without returning to Android's main thread.

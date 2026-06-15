@@ -404,6 +404,14 @@ def main() -> int:
         or search_task.find('Log.e(TAG, "Twitter result formatting failed")') > search_task.find("continue;")
     ):
         failures.append("Twitter result formatting failures must use redacted logging and skip malformed rows")
+    search_ui_handoff_index = search_task.find("runOnUiThread(new Runnable()")
+    search_view_lookup_index = search_task.find("findViewById(R.id.list)")
+    search_adapter_index = search_task.find("listView.setAdapter(a)")
+    if not (
+        search_task.count("findViewById(R.id.list)") == 1
+        and 0 <= search_ui_handoff_index < search_view_lookup_index < search_adapter_index
+    ):
+        failures.append("Twitter search view lookup and adapter mutation must run on the activity UI thread")
     artwork_task = rdio_app.split("// Fetch album art in the background", 1)[1].split("artworkTask.execute(track)", 1)[0]
     if (
         "URLUtil.isHttpsUrl(artworkUrl)" not in artwork_task
@@ -602,6 +610,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document the Twitter login in-flight guard")
         if "rdio authorization flow guard" not in text.lower():
             failures.append(f"{relative_path} must document the Rdio authorization flow guard")
+        if "twitter search view lookup ui thread" not in text.lower():
+            failures.append(f"{relative_path} must document the Twitter search view lookup UI thread rule")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -630,6 +640,8 @@ def main() -> int:
         failures.append("CHANGES must record the Twitter authorization origin guard")
     if "rdio authorization flow guard" not in changes.lower():
         failures.append("CHANGES must record the Rdio authorization flow guard")
+    if "twitter search view lookup ui thread" not in changes.lower():
+        failures.append("CHANGES must record the Twitter search view lookup UI thread rule")
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
         if "twitter search failure guard" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document the Twitter search failure guard")
@@ -681,6 +693,16 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", rdio_flow_verification)
     ):
         failures.append("Rdio authorization flow guard plan must record completed verification")
+    search_view_plan = read_text("docs/plans/2026-06-15-twitter-search-view-lookup-ui-thread.md")
+    search_view_verification = markdown_section(search_view_plan, "Verification Completed")
+    if (
+        "status: completed" not in search_view_plan.lower()
+        or "All four Make gates passed" not in search_view_verification
+        or "Six isolated hostile mutations were rejected" not in search_view_verification
+        or "external directory" not in search_view_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", search_view_verification)
+    ):
+        failures.append("Twitter search view lookup UI thread plan must record completed verification")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

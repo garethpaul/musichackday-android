@@ -691,10 +691,10 @@ public class RdioApp extends Activity implements RdioListener {
 
             }
 
-            final ListView listView = (ListView) findViewById(R.id.list);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    final ListView listView = (ListView) findViewById(R.id.list);
                     String[] array = items.toArray(new String[items.size()]);
                     //r
 

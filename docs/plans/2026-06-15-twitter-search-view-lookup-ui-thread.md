@@ -1,6 +1,6 @@
 # Twitter Search View Lookup UI Thread
 
-status: in progress
+status: completed
 
 ## Problem
 
@@ -42,3 +42,24 @@ state from the background thread.
   limited to removing the demonstrated worker-thread view lookup.
 - No provider, credential, or adapter behavior changes.
 - The stacked base pull request must remain available and merge first.
+
+## Work Completed
+
+- Moved the single search-result `ListView` lookup into the existing activity
+  UI-thread runnable before adapter construction and installation.
+- Added an ordering-sensitive contract requiring one lookup after the handoff
+  and before adapter mutation.
+- Added synchronized maintenance, security, vision, and change guidance.
+
+## Verification Completed
+
+- All four Make gates passed from the repository and the canonical check passed
+  from an external directory through the absolute Makefile path.
+- The baseline checker compiled and passed without requiring an Android SDK.
+- Six isolated hostile mutations were rejected: worker-thread lookup, adapter
+  mutation before lookup, duplicate lookup, missing maintenance guidance,
+  missing changelog evidence, and stale plan status.
+- `git diff --check`, exact intended-path, generated-artifact,
+  credential-pattern, dependency-file, conflict-marker, binary, and large-file
+  audits passed.
+- No Twitter, Rdio, credential, browser, or Android runtime was contacted.

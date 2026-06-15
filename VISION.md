@@ -39,6 +39,7 @@ Priority:
 - Keep Rdio authorization error redaction at action-level log detail
 - Keep the Twitter search failure guard redacted and ahead of result iteration
 - Keep the Twitter navigation UI thread handoff around OAuth activity launches
+- Keep the Twitter login in-flight guard ahead of request-token worker creation
 - Keep the Twitter authorization origin guard before browser launch
 - Keep local editor metadata out of the shared Android project baseline
 - Keep legacy build coordinates pinned for reproducible archaeology

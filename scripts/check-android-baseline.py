@@ -66,6 +66,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-14-twitter-authorization-origin-guard.md",
     "docs/plans/2026-06-14-twitter-search-failure-guard.md",
     "docs/plans/2026-06-15-twitter-navigation-ui-thread.md",
+    "docs/plans/2026-06-15-twitter-login-inflight-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -278,6 +279,39 @@ def main() -> int:
         0 <= authorization_validation_index < authorization_handoff_index < authorization_navigation_index
     ):
         failures.append("Twitter authorization browser navigation must run on the UI thread after origin validation")
+    login_method = main_activity.split("private void loginToTwitter()", 1)[1].split("private void finishTwitterLoginAttempt()", 1)[0]
+    login_guard_index = login_method.find("if (twitterLoginInFlight)")
+    login_acquire_index = login_method.find("twitterLoginInFlight = true")
+    login_thread_index = login_method.find("Thread thread = new Thread")
+    invalid_origin_index = login_method.find("if (!isTrustedTwitterAuthenticationUri(authenticationUri))")
+    invalid_origin_release_index = login_method.find("finishTwitterLoginAttempt()", invalid_origin_index)
+    success_release_index = login_method.find("twitterLoginInFlight = false", invalid_origin_release_index)
+    success_navigation_index = login_method.find("MainActivity.this.startActivity", success_release_index)
+    request_failure_index = login_method.find('logTwitterLoginFailure("Request token creation")')
+    request_failure_catch_index = login_method.rfind("} catch (Exception e)", 0, request_failure_index)
+    request_failure_release_index = login_method.rfind("finishTwitterLoginAttempt()", 0, request_failure_index)
+    setup_failure_index = login_method.find('logTwitterLoginFailure("Request token setup")')
+    setup_failure_catch_index = login_method.rfind("} catch (Exception e)", 0, setup_failure_index)
+    setup_release_index = login_method.rfind("twitterLoginInFlight = false", 0, setup_failure_index)
+    if not (
+        "private boolean twitterLoginInFlight;" in main_activity
+        and 0 <= login_guard_index < login_acquire_index < login_thread_index
+    ):
+        failures.append("Twitter login must reject overlapping request-token workers before acquiring ownership")
+    if not (
+        0 <= invalid_origin_index < invalid_origin_release_index
+        and 0 <= request_failure_catch_index < request_failure_release_index < request_failure_index
+        and 0 <= setup_failure_catch_index < setup_release_index < setup_failure_index
+    ):
+        failures.append("Twitter login failures must release request-token ownership")
+    if not (0 <= success_release_index < success_navigation_index):
+        failures.append("Twitter login success must release ownership before browser navigation")
+    finish_login_method = main_activity.split("private void finishTwitterLoginAttempt()", 1)[1].split("private void logTwitterLoginFailure", 1)[0]
+    if (
+        "MainActivity.this.runOnUiThread(new Runnable()" not in finish_login_method
+        or "twitterLoginInFlight = false;" not in finish_login_method
+    ):
+        failures.append("Twitter login failure release must return to the activity UI thread")
 
     file_cache = read_text("app/src/main/java/com/twitterdev/rdio/app/FileCache.java")
     if "context.getCacheDir()" not in file_cache:
@@ -515,6 +549,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document the album art connection guard")
         if "twitter authorization origin guard" not in text.lower():
             failures.append(f"{relative_path} must document the Twitter authorization origin guard")
+        if "twitter login in-flight guard" not in text.lower():
+            failures.append(f"{relative_path} must document the Twitter login in-flight guard")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -566,6 +602,16 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", navigation_verification)
     ):
         failures.append("Twitter navigation UI thread handoff plan must record completed verification")
+    login_inflight_plan = read_text("docs/plans/2026-06-15-twitter-login-inflight-guard.md")
+    login_inflight_verification = markdown_section(login_inflight_plan, "Verification Completed")
+    if (
+        "status: completed" not in login_inflight_plan.lower()
+        or "All four Make gates passed" not in login_inflight_verification
+        or "Eight isolated hostile mutations were rejected" not in login_inflight_verification
+        or "external directory" not in login_inflight_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", login_inflight_verification)
+    ):
+        failures.append("Twitter login in-flight guard plan must record completed verification")
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
         if "rdio authorization error redaction" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document Rdio authorization error redaction")

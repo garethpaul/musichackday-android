@@ -4,6 +4,8 @@
 
 - Added a Twitter navigation UI thread handoff for authorization-browser and
   post-token activity launches from OAuth workers.
+- Added a Twitter login in-flight guard so repeated taps cannot start
+  overlapping request-token workers or duplicate browser navigation.
 
 ## 2026-06-14
 

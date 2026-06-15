@@ -106,6 +106,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   out of logs and returns before iterating a failed result.
 - The Twitter navigation UI thread handoff keeps OAuth browser and post-login
   activity launches on Android's main thread.
+- The Twitter login in-flight guard rejects repeated taps while request-token
+  creation is active and releases ownership on every terminal path.
 - The Twitter authorization origin guard launches the browser only for the
   canonical HTTPS `api.twitter.com/oauth/authenticate` endpoint on its default
   port.

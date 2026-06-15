@@ -91,6 +91,8 @@ result.
 
 Twitter navigation UI thread handoff reports should include whether either OAuth
 worker can launch an activity without returning to Android's main thread.
+Twitter login in-flight guard reports should include whether repeated taps can
+start overlapping request-token workers or replace the active callback token.
 
 ## Dependency and Supply Chain Security
 

@@ -1,6 +1,6 @@
 # Tweet Adapter Error Redaction
 
-status: planned
+status: completed
 
 ## Problem
 
@@ -63,3 +63,26 @@ Test scenarios:
   baseline.
 - This change is stacked on the open Rdio credential persistence pull request,
   which must remain open and merge first.
+
+## Work Completed
+
+- Replaced the adapter's malformed-row stack trace with a constant Android log
+  message that carries no exception details.
+- Added an adapter-specific static contract that rejects stack traces,
+  exception messages, exception-bearing log overloads, and missing fixed-log
+  behavior.
+- Synchronized README, security, vision, and change guidance around the named
+  redaction boundary.
+
+## Verification Completed
+
+- All four SDK-free Make gates passed from the checkout, and the canonical
+  check passed from an external directory through the absolute Makefile path.
+- Six isolated hostile mutations were rejected across restored stack traces,
+  exception-bearing logging, missing fixed logging, README guidance, change
+  history, and completed plan status.
+- Checker compilation, exact diff review, generated-artifact inspection,
+  secret-pattern scanning, conflict-marker checks, and binary and large-file
+  audits passed.
+- The SDK-free Linux baseline did not invoke the Android SDK, emulator, device,
+  OAuth providers, Rdio, Twitter, or image downloads.

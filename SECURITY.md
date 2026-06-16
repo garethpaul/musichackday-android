@@ -94,6 +94,8 @@ be bypassed to write provider exception details or stack traces.
 Twitter search reports should include whether the Twitter search failure guard
 can be bypassed to log raw queries, provider stack traces, or iterate a failed
 result.
+Tweet adapter error redaction reports should include whether malformed search
+rows can write exception messages or stack traces to Android logs.
 Twitter search view lookup UI thread reports should include whether result-list
 lookup or adapter installation can escape the activity's main-thread handoff.
 

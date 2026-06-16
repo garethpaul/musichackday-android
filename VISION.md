@@ -40,6 +40,7 @@ Priority:
 - Keep the Rdio authorization flow guard fail-closed before playback preparation
 - Keep the Rdio credential persistence guard before playback preparation
 - Keep the Twitter search failure guard redacted and ahead of result iteration
+- Keep tweet adapter error redaction fixed and free of exception diagnostics
 - Keep the Twitter search view lookup UI thread rule around result rendering
 - Keep the Twitter navigation UI thread handoff around OAuth activity launches
 - Keep the Twitter login in-flight guard ahead of request-token worker creation

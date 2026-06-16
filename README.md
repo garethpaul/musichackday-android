@@ -108,6 +108,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   returned credential pair is stored successfully.
 - The Twitter search failure guard keeps raw queries and provider stack traces
   out of logs and returns before iterating a failed result.
+- Tweet adapter error redaction replaces malformed-row stack traces with a
+  fixed action-level rendering failure message.
 - The Twitter search view lookup UI thread rule keeps result-list lookup and
   adapter installation inside the activity's main-thread handoff.
 - The Twitter navigation UI thread handoff keeps OAuth browser and post-login

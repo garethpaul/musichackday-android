@@ -2,6 +2,8 @@
 
 ## 2026-06-16
 
+- Added an Rdio credential persistence guard so callback tokens must match the
+  active pair and commit successfully before playback preparation.
 - Added a Twitter credential persistence guard so failed token storage releases
   callback ownership and stops before authenticated navigation.
 

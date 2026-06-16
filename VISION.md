@@ -38,6 +38,7 @@ Priority:
 - Keep sanitized OAuth error logging for Twitter login failures
 - Keep Rdio authorization error redaction at action-level log detail
 - Keep the Rdio authorization flow guard fail-closed before playback preparation
+- Keep the Rdio credential persistence guard before playback preparation
 - Keep the Twitter search failure guard redacted and ahead of result iteration
 - Keep the Twitter search view lookup UI thread rule around result rendering
 - Keep the Twitter navigation UI thread handoff around OAuth activity launches

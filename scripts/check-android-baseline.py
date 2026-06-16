@@ -72,6 +72,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-15-twitter-callback-inflight-guard.md",
     "docs/plans/2026-06-15-twitter-callback-state-snapshot.md",
     "docs/plans/2026-06-16-twitter-credential-persistence-guard.md",
+    "docs/plans/2026-06-16-rdio-credential-persistence-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -428,16 +429,72 @@ def main() -> int:
         "rdio.setTokenAndSecret(accessToken, accessTokenSecret)"
     )
     rdio_result_prepare_index = rdio_result_method.find("rdio.prepareForPlayback()")
+    rdio_result_persist_index = rdio_result_method.find(
+        "if (!persistRdioCredentials(accessToken, accessTokenSecret))"
+    )
+    rdio_result_persist_clear_index = rdio_result_method.find(
+        "clearRdioCredentials();", rdio_result_persist_index
+    )
+    rdio_result_persist_log_index = rdio_result_method.find(
+        'Log.w(TAG, "Rdio credential persistence failed")', rdio_result_persist_index
+    )
+    rdio_result_persist_return_index = rdio_result_method.find(
+        "return;", rdio_result_persist_index
+    )
     if not (
         0 <= rdio_result_release_index < rdio_result_status_guard_index
         < rdio_result_token_index < rdio_result_token_guard_index
+        < rdio_result_persist_index < rdio_result_persist_clear_index
+        < rdio_result_persist_log_index < rdio_result_persist_return_index
         < rdio_result_install_index < rdio_result_prepare_index
         and rdio_result_method.count("return;") >= 3
         and rdio_result_method.count('Log.w(TAG, "Rdio authorization failed")') == 2
         and "value != null && value.trim().length() > 0" in rdio_app
-        and rdio_result_method.count("rdio.prepareForPlayback()") == 1
+        and "onRdioAuthorised(accessToken, accessTokenSecret)" not in rdio_result_method
     ):
-        failures.append("Rdio authorization results must validate both credentials before playback preparation")
+        failures.append("Rdio credential persistence must succeed before SDK installation and playback")
+    rdio_authorised_method = rdio_app.split(
+        "public void onRdioAuthorised(String accessToken, String accessTokenSecret)", 1
+    )[1].split("/*************************\n     * Activity overrides", 1)[0]
+    rdio_callback_identity_index = rdio_authorised_method.find(
+        "!accessToken.equals(RdioApp.accessToken)"
+    )
+    rdio_callback_stale_log_index = rdio_authorised_method.find(
+        'Log.w(TAG, "Rdio authorization callback ignored")'
+    )
+    rdio_callback_stale_return_index = rdio_authorised_method.find(
+        "return;", rdio_callback_stale_log_index
+    )
+    rdio_callback_commit_index = rdio_authorised_method.find(
+        "if (!persistRdioCredentials(accessToken, accessTokenSecret))"
+    )
+    rdio_callback_log_index = rdio_authorised_method.find(
+        'Log.w(TAG, "Rdio credential persistence failed")', rdio_callback_commit_index
+    )
+    rdio_callback_return_index = rdio_authorised_method.find(
+        "return;", rdio_callback_commit_index
+    )
+    rdio_callback_prepare_index = rdio_authorised_method.find("rdio.prepareForPlayback()")
+    if not (
+        0 <= rdio_callback_identity_index < rdio_callback_stale_log_index
+        < rdio_callback_stale_return_index < rdio_callback_commit_index
+        < rdio_callback_log_index < rdio_callback_return_index
+        and rdio_callback_prepare_index == -1
+        and rdio_authorised_method.count(
+            "if (!persistRdioCredentials(accessToken, accessTokenSecret))"
+        ) == 1
+        and "Application authorised and credentials saved." in rdio_authorised_method
+    ):
+        failures.append("Rdio authorization callbacks must persist only the active credential pair")
+    rdio_persistence_method = rdio_app.split(
+        "private boolean persistRdioCredentials(String token, String tokenSecret)", 1
+    )[1].split("private void clearRdioCredentials()", 1)[0]
+    if not (
+        "editor.putString(PREF_ACCESSTOKEN, token)" in rdio_persistence_method
+        and "editor.putString(PREF_ACCESSTOKENSECRET, tokenSecret)" in rdio_persistence_method
+        and "return editor.commit();" in rdio_persistence_method
+    ):
+        failures.append("Rdio credential persistence must return the synchronous commit result")
     if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
         failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
     search_task = rdio_app.split("private class getSearch", 1)[1]
@@ -668,6 +725,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document the Twitter credential persistence guard")
         if "rdio authorization flow guard" not in text.lower():
             failures.append(f"{relative_path} must document the Rdio authorization flow guard")
+        if "rdio credential persistence guard" not in text.lower():
+            failures.append(f"{relative_path} must document the Rdio credential persistence guard")
         if "twitter search view lookup ui thread" not in text.lower():
             failures.append(f"{relative_path} must document the Twitter search view lookup UI thread rule")
     if "image download guard" not in changes.lower():
@@ -700,6 +759,8 @@ def main() -> int:
         failures.append("CHANGES must record the Twitter authorization origin guard")
     if "rdio authorization flow guard" not in changes.lower():
         failures.append("CHANGES must record the Rdio authorization flow guard")
+    if "rdio credential persistence guard" not in changes.lower():
+        failures.append("CHANGES must record the Rdio credential persistence guard")
     if "twitter search view lookup ui thread" not in changes.lower():
         failures.append("CHANGES must record the Twitter search view lookup UI thread rule")
     for relative_path in ["README.md", "VISION.md", "SECURITY.md", "CHANGES.md"]:
@@ -797,6 +858,17 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", persistence_verification)
     ):
         failures.append("Twitter credential persistence guard plan must record completed verification")
+    rdio_persistence_plan = read_text("docs/plans/2026-06-16-rdio-credential-persistence-guard.md")
+    rdio_persistence_verification = markdown_section(rdio_persistence_plan, "Verification Completed")
+    if (
+        "status: completed" not in rdio_persistence_plan.lower()
+        or "All four Make gates passed" not in rdio_persistence_verification
+        or "Seven isolated hostile mutations were rejected" not in rdio_persistence_verification
+        or "external directory" not in rdio_persistence_verification
+        or "Android SDK" not in rdio_persistence_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", rdio_persistence_verification)
+    ):
+        failures.append("Rdio credential persistence guard plan must record completed verification")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

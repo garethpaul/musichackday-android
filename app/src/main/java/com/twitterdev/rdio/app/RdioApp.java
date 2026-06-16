@@ -498,13 +498,19 @@ public class RdioApp extends Activity implements RdioListener {
      */
     @Override
     public void onRdioAuthorised(String accessToken, String accessTokenSecret) {
-        Log.i(TAG, "Application authorised, saving access token & secret.");
+        if (!hasRdioCredential(accessToken) || !hasRdioCredential(accessTokenSecret)
+                || !accessToken.equals(RdioApp.accessToken)
+                || !accessTokenSecret.equals(RdioApp.accessTokenSecret)) {
+            Log.w(TAG, "Rdio authorization callback ignored");
+            return;
+        }
 
-        SharedPreferences settings = getPreferences(MODE_PRIVATE);
-        Editor editor = settings.edit();
-        editor.putString(PREF_ACCESSTOKEN, accessToken);
-        editor.putString(PREF_ACCESSTOKENSECRET, accessTokenSecret);
-        editor.commit();
+        if (!persistRdioCredentials(accessToken, accessTokenSecret)) {
+            Log.w(TAG, "Rdio credential persistence failed");
+            return;
+        }
+
+        Log.i(TAG, "Application authorised and credentials saved.");
     }
 
     /*************************
@@ -534,7 +540,11 @@ public class RdioApp extends Activity implements RdioListener {
 
         accessToken = returnedToken;
         accessTokenSecret = returnedTokenSecret;
-        onRdioAuthorised(accessToken, accessTokenSecret);
+        if (!persistRdioCredentials(accessToken, accessTokenSecret)) {
+            clearRdioCredentials();
+            Log.w(TAG, "Rdio credential persistence failed");
+            return;
+        }
         rdio.setTokenAndSecret(accessToken, accessTokenSecret);
         rdio.prepareForPlayback();
     }
@@ -559,6 +569,14 @@ public class RdioApp extends Activity implements RdioListener {
 
     private boolean hasRdioCredential(String value) {
         return value != null && value.trim().length() > 0;
+    }
+
+    private boolean persistRdioCredentials(String token, String tokenSecret) {
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        Editor editor = settings.edit();
+        editor.putString(PREF_ACCESSTOKEN, token);
+        editor.putString(PREF_ACCESSTOKENSECRET, tokenSecret);
+        return editor.commit();
     }
 
     private void clearRdioCredentials() {

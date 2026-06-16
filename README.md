@@ -104,6 +104,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   application logs while preserving token cleanup.
 - The Rdio authorization flow guard prevents duplicate OAuth activities and
   prepares playback only after both returned credentials are nonblank.
+- The Rdio credential persistence guard prepares playback only after the exact
+  returned credential pair is stored successfully.
 - The Twitter search failure guard keeps raw queries and provider stack traces
   out of logs and returns before iterating a failed result.
 - The Twitter search view lookup UI thread rule keeps result-list lookup and
@@ -154,6 +156,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep the Twitter callback state snapshot isolated from new login attempts.
 - Keep the Twitter credential persistence guard before post-login navigation.
 - Keep the Rdio authorization flow guard around every OAuth launch and result.
+- Keep the Rdio credential persistence guard before playback preparation.
 - Keep the Twitter authorization origin guard in place so library or
   configuration drift cannot launch login on an alternate scheme or origin.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.

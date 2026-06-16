@@ -1,6 +1,6 @@
 # Rdio Credential Persistence Guard
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -13,7 +13,8 @@ create an authenticated in-memory state that disappears after restart.
 
 - Require successful credential persistence before installing the Rdio token
   pair or preparing playback.
-- Clear in-memory credential ownership and return on persistence failure.
+- Clear in-memory credential ownership and return when initial result
+  persistence fails.
 - Keep failure logging action-level and free of token values.
 - Make commit-result handling and terminal ordering mutation-sensitive in the
   SDK-free baseline.
@@ -43,3 +44,17 @@ create an authenticated in-memory state that disappears after restart.
 
 - Provider endpoints, OAuth credential formats, encrypted storage migration,
   dependency upgrades, and live Rdio/Twitter authentication.
+
+## Verification Completed
+
+- All four Make gates passed from the repository root.
+- The absolute Makefile check passed from an external directory.
+- Seven isolated hostile mutations were rejected: removing callback identity,
+  ignoring the commit result, removing ownership cleanup, removing the terminal
+  return, preparing playback before persistence, removing callback persistence,
+  and reopening the plan status.
+- Python checker compilation, git diff checks, artifact inspection,
+  conflict-marker inspection, file-mode inspection, and added-line credential
+  pattern review passed.
+- The Android SDK, emulator, device, and live Rdio/Twitter provider flows were
+  not exercised; the SDK-free baseline remains the local runtime boundary.

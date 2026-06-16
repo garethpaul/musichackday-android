@@ -65,6 +65,8 @@ Helpful reports include:
   of application logs.
 - The Rdio authorization flow guard should reject overlapping OAuth launches
   and fail closed before playback preparation when credentials are incomplete.
+- The Rdio credential persistence guard should reject stale callback tokens and
+  stop before playback when durable token storage fails.
 - The Twitter authorization origin guard should require the canonical HTTPS
   Twitter host, default port, and authenticate path before launching an
   external browser.
@@ -108,6 +110,9 @@ token storage can still enter the authenticated application flow.
 
 Rdio authorization flow guard reports should include whether startup can open
 multiple OAuth activities or canceled and malformed results can prepare playback.
+
+Rdio credential persistence guard reports should include whether failed token
+storage can still prepare authenticated playback.
 
 ## Dependency and Supply Chain Security
 

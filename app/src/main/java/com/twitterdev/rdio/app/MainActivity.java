@@ -114,7 +114,11 @@ public class MainActivity extends ActionBarActivity {
                                 e.putString(Constants.PREF_KEY_OAUTH_SECRET, accessToken.getTokenSecret());
                                 // Store login status - true
                                 e.putBoolean(Constants.PREF_KEY_TWITTER_LOGIN, true);
-                                e.commit(); // save changes
+                                if (!e.commit()) {
+                                    finishTwitterCallbackExchange();
+                                    logTwitterLoginFailure("Credential persistence");
+                                    return;
+                                }
 
                                 MainActivity.this.runOnUiThread(new Runnable() {
                                     @Override

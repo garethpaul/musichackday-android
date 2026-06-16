@@ -71,6 +71,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-15-twitter-search-view-lookup-ui-thread.md",
     "docs/plans/2026-06-15-twitter-callback-inflight-guard.md",
     "docs/plans/2026-06-15-twitter-callback-state-snapshot.md",
+    "docs/plans/2026-06-16-twitter-credential-persistence-guard.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -311,6 +312,24 @@ def main() -> int:
         and "private void finishTwitterCallbackExchange()" in main_activity
     ):
         failures.append("Twitter callback exchange ownership must release on every terminal path")
+    callback_commit_index = callback_block.find("if (!e.commit())")
+    callback_persistence_release_index = callback_block.find(
+        "finishTwitterCallbackExchange()", callback_commit_index
+    )
+    callback_persistence_log_index = callback_block.find(
+        'logTwitterLoginFailure("Credential persistence")', callback_commit_index
+    )
+    callback_persistence_return_index = callback_block.find("return;", callback_persistence_log_index)
+    callback_persistence_handoff_index = callback_block.find(
+        "MainActivity.this.runOnUiThread(new Runnable()", callback_commit_index
+    )
+    if not (
+        "e.commit(); // save changes" not in callback_block
+        and 0 <= callback_commit_index < callback_persistence_release_index
+        < callback_persistence_log_index < callback_persistence_return_index
+        < callback_persistence_handoff_index
+    ):
+        failures.append("Twitter credential persistence must succeed before callback navigation")
     if not (
         0 <= authorization_validation_index < authorization_handoff_index < authorization_navigation_index
     ):
@@ -645,6 +664,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document the Twitter login in-flight guard")
         if "twitter callback state snapshot" not in text.lower():
             failures.append(f"{relative_path} must document the Twitter callback state snapshot")
+        if "twitter credential persistence guard" not in text.lower():
+            failures.append(f"{relative_path} must document the Twitter credential persistence guard")
         if "rdio authorization flow guard" not in text.lower():
             failures.append(f"{relative_path} must document the Rdio authorization flow guard")
         if "twitter search view lookup ui thread" not in text.lower():
@@ -653,6 +674,8 @@ def main() -> int:
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
         failures.append("CHANGES must record SHA-256 cache filenames")
+    if "twitter credential persistence guard" not in changes.lower():
+        failures.append("CHANGES must record the Twitter credential persistence guard")
     if "memory cache entry guards" not in changes.lower():
         failures.append("CHANGES must record memory cache entry guards")
     if "http image url guard" not in changes.lower():
@@ -763,6 +786,17 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", callback_snapshot_verification)
     ):
         failures.append("Twitter callback state snapshot plan must record completed verification")
+    persistence_plan = read_text("docs/plans/2026-06-16-twitter-credential-persistence-guard.md")
+    persistence_verification = markdown_section(persistence_plan, "Verification Completed")
+    if (
+        "status: completed" not in persistence_plan.lower()
+        or "All four Make gates passed" not in persistence_verification
+        or "Eight isolated hostile mutations were rejected" not in persistence_verification
+        or "external directory" not in persistence_verification
+        or "Android SDK" not in persistence_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", persistence_verification)
+    ):
+        failures.append("Twitter credential persistence guard plan must record completed verification")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

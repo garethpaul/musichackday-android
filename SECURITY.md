@@ -68,6 +68,8 @@ Helpful reports include:
 - The Twitter authorization origin guard should require the canonical HTTPS
   Twitter host, default port, and authenticate path before launching an
   external browser.
+- The Twitter credential persistence guard should release callback ownership
+  and stop before navigation when durable token storage fails.
 - Local editor metadata should stay ignored so machine-specific SDK paths,
   workspace state, and IDE module files are not committed.
 
@@ -101,6 +103,8 @@ Twitter callback exchange in-flight guard reports should include whether
 activity recreation can exchange the same valid request token concurrently.
 Twitter callback state snapshot reports should include whether a new login can
 replace validated OAuth dependencies before verifier exchange completes.
+Twitter credential persistence guard reports should include whether failed
+token storage can still enter the authenticated application flow.
 
 Rdio authorization flow guard reports should include whether startup can open
 multiple OAuth activities or canceled and malformed results can prepare playback.

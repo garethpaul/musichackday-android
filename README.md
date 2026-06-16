@@ -116,6 +116,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   callbacks across activity recreation until the active exchange finishes.
 - The Twitter callback state snapshot binds verifier exchange to the exact
   Twitter client and request token that passed callback validation.
+- The Twitter credential persistence guard stops callback navigation unless
+  the returned token, secret, and login state are stored successfully.
 - The Twitter authorization origin guard launches the browser only for the
   canonical HTTPS `api.twitter.com/oauth/authenticate` endpoint on its default
   port.
@@ -150,6 +152,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep the Twitter navigation UI thread handoff around both worker success paths.
 - Keep the Twitter callback exchange in-flight guard around access-token work.
 - Keep the Twitter callback state snapshot isolated from new login attempts.
+- Keep the Twitter credential persistence guard before post-login navigation.
 - Keep the Rdio authorization flow guard around every OAuth launch and result.
 - Keep the Twitter authorization origin guard in place so library or
   configuration drift cannot launch login on an alternate scheme or origin.

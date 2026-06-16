@@ -1,6 +1,6 @@
 # Twitter Credential Persistence Guard
 
-Status: planned
+Status: completed
 
 ## Priority
 
@@ -57,3 +57,17 @@ storage fails, the activity still releases callback ownership and launches
 - Every failed persistence attempt releases callback ownership and remains
   retryable without exposing sensitive values.
 - Successful persistence retains the existing UI-thread navigation behavior.
+
+## Verification Completed
+
+- All four Make gates passed from the repository root.
+- The absolute Makefile `check` gate passed from an external directory.
+- The Python baseline checker compiled with bytecode redirected outside the
+  repository.
+- Eight isolated hostile mutations were rejected across commit-result checks,
+  ownership release, sanitized logging, terminal return, navigation ordering,
+  maintained guidance, changelog evidence, and plan completion.
+- Exact diff, generated-artifact, credential-pattern, conflict-marker, binary,
+  large-file, and whitespace audits passed.
+- The Android SDK, emulator, providers, credentials, and browser callback were
+  not executed on Linux; the maintained SDK-free baseline passed instead.

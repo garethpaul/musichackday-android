@@ -44,6 +44,7 @@ Priority:
 - Keep the Twitter login in-flight guard ahead of request-token worker creation
 - Keep the Twitter callback exchange in-flight guard across activity recreation
 - Keep the Twitter callback state snapshot bound to validated OAuth dependencies
+- Keep the Twitter credential persistence guard before authenticated navigation
 - Keep the Twitter authorization origin guard before browser launch
 - Keep local editor metadata out of the shared Android project baseline
 - Keep legacy build coordinates pinned for reproducible archaeology

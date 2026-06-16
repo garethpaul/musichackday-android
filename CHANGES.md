@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-16
+
+- Added a Twitter credential persistence guard so failed token storage releases
+  callback ownership and stops before authenticated navigation.
+
 ## 2026-06-15
 
 - Added a Twitter navigation UI thread handoff for authorization-browser and

@@ -67,6 +67,8 @@ Helpful reports include:
   and fail closed before playback preparation when credentials are incomplete.
 - The Rdio credential persistence guard should reject stale callback tokens and
   stop before playback when durable token storage fails.
+- Playback error redaction should keep caught SDK and media exception details
+  out of device logs while retaining an action-level failure signal.
 - The Twitter authorization origin guard should require the canonical HTTPS
   Twitter host, default port, and authenticate path before launching an
   external browser.
@@ -115,6 +117,9 @@ multiple OAuth activities or canceled and malformed results can prepare playback
 
 Rdio credential persistence guard reports should include whether failed token
 storage can still prepare authenticated playback.
+
+Playback error redaction reports should include whether player preparation can
+write exception objects, messages, or stack traces to Android logs.
 
 ## Dependency and Supply Chain Security
 

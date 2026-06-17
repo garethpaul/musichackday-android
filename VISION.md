@@ -39,6 +39,7 @@ Priority:
 - Keep Rdio authorization error redaction at action-level log detail
 - Keep the Rdio authorization flow guard fail-closed before playback preparation
 - Keep the Rdio credential persistence guard before playback preparation
+- Keep playback error redaction fixed and free of exception diagnostics
 - Keep the Twitter search failure guard redacted and ahead of result iteration
 - Keep tweet adapter error redaction fixed and free of exception diagnostics
 - Keep the Twitter search view lookup UI thread rule around result rendering

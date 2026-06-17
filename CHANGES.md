@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-17
+
+- Added playback error redaction so player preparation failures retain a fixed
+  action-level signal without writing caught exception details to Android logs.
+
 ## 2026-06-16
 
 - Added tweet adapter error redaction so malformed result rows emit a fixed

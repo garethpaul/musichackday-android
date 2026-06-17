@@ -74,6 +74,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-16-twitter-credential-persistence-guard.md",
     "docs/plans/2026-06-16-rdio-credential-persistence-guard.md",
     "docs/plans/2026-06-16-tweet-adapter-error-redaction.md",
+    "docs/plans/2026-06-17-playback-error-redaction.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -385,6 +386,17 @@ def main() -> int:
     if "isHttpsImageUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "URLUtil.isHttpUrl" in image_download or "params.length == 0" not in image_download:
         failures.append("ImageDownload must guard missing URLs and accept only HTTPS images")
     rdio_app = read_text("app/src/main/java/com/twitterdev/rdio/app/RdioApp.java")
+    playback_task = rdio_app.split(
+        "AsyncTask<Track, Void, Track> task = new AsyncTask<Track, Void, Track>()", 1
+    )[1].split("task.execute(track);", 1)[0]
+    if (
+        'Log.e(TAG, "Playback preparation failed")' not in playback_task
+        or 'Log.e("Test", "Exception " + e)' in playback_task
+        or 'Log.e(TAG, "Playback preparation failed", e)' in playback_task
+        or ".getMessage()" in playback_task
+        or "printStackTrace()" in playback_task
+    ):
+        failures.append("Playback preparation failures must use redacted action-level logging")
 
     tweet_adapter = read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java")
     adapter_catch_marker = "} catch (JSONException e) {"
@@ -784,6 +796,8 @@ def main() -> int:
             failures.append(f"{relative_path} must document the Twitter navigation UI thread handoff")
         if "tweet adapter error redaction" not in read_text(relative_path).lower():
             failures.append(f"{relative_path} must document TweetAdapter error redaction")
+        if "playback error redaction" not in read_text(relative_path).lower():
+            failures.append(f"{relative_path} must document playback error redaction")
     search_failure_plan = read_text("docs/plans/2026-06-14-twitter-search-failure-guard.md")
     search_failure_verification = markdown_section(search_failure_plan, "Verification Completed")
     if (
@@ -896,6 +910,19 @@ def main() -> int:
         or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", adapter_redaction_verification)
     ):
         failures.append("TweetAdapter error redaction plan must record completed verification")
+    playback_redaction_plan = read_text("docs/plans/2026-06-17-playback-error-redaction.md")
+    playback_redaction_verification = markdown_section(
+        playback_redaction_plan, "Verification Completed"
+    )
+    if (
+        "status: completed" not in playback_redaction_plan.lower()
+        or "All four SDK-free Make gates passed" not in playback_redaction_verification
+        or "Six isolated hostile mutations were rejected" not in playback_redaction_verification
+        or "external directory" not in playback_redaction_verification
+        or "Android SDK" not in playback_redaction_verification
+        or re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", playback_redaction_verification)
+    ):
+        failures.append("Playback error redaction plan must record completed verification")
     if "make lint" not in changes or "make test" not in changes or "make build" not in changes or "make check" not in changes:
         failures.append("CHANGES must record standard Make gate aliases")
     if "status: completed" not in authorization_origin_plan or "hostile mutations" not in authorization_origin_plan:

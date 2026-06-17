@@ -358,7 +358,7 @@ public class RdioApp extends Activity implements RdioListener {
                     });
 
                 } catch (Exception e) {
-                    Log.e("Test", "Exception " + e);
+                    Log.e(TAG, "Playback preparation failed");
                 }
                 return track;
             }

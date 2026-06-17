@@ -159,6 +159,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep the Twitter credential persistence guard before post-login navigation.
 - Keep the Rdio authorization flow guard around every OAuth launch and result.
 - Keep the Rdio credential persistence guard before playback preparation.
+- Keep playback error redaction fixed and free of exception diagnostics.
 - Keep the Twitter authorization origin guard in place so library or
   configuration drift cannot launch login on an alternate scheme or origin.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.

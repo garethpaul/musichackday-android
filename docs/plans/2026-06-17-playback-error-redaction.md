@@ -1,6 +1,6 @@
 # Playback Error Redaction
 
-status: planned
+status: completed
 
 ## Problem
 
@@ -42,7 +42,7 @@ Test scenarios:
 
 - All SDK-free Make gates accept the implementation.
 - Mutations removing the fixed log, restoring exception details, removing the
-  checker contract, or leaving this plan incomplete are rejected.
+  documented boundary, or leaving this plan incomplete are rejected.
 - The absolute Makefile path continues to run successfully outside the
   checkout.
 
@@ -63,3 +63,26 @@ Test scenarios:
   baseline.
 - This change is stacked on the open tweet-adapter error-redaction pull request,
   which must remain open and merge first.
+
+## Work Completed
+
+- Replaced the playback preparation catch path's exception-bearing log with a
+  fixed action-level message through the application tag.
+- Added a playback-task-specific static contract that rejects the legacy tag,
+  exception concatenation, exception-bearing log overloads, exception messages,
+  and stack traces.
+- Synchronized README, security, vision, and change guidance around the named
+  playback error-redaction boundary.
+
+## Verification Completed
+
+- All four SDK-free Make gates passed from the checkout, and the canonical
+  check passed from an external directory through the absolute Makefile path.
+- Six isolated hostile mutations were rejected across missing fixed logging,
+  restored exception concatenation, exception-bearing logging, README guidance,
+  change history, and completed plan status.
+- Checker compilation, exact diff review, generated-artifact inspection,
+  secret-pattern scanning, conflict-marker checks, and binary and large-file
+  audits passed.
+- The SDK-free Linux baseline did not invoke the Android SDK, emulator, device,
+  OAuth providers, Rdio, Twitter, media playback, or image downloads.

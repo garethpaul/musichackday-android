@@ -12,23 +12,23 @@ CHECKER_PATH = ROOT / "scripts/check-android-baseline.py"
 PLAN_PATH = ROOT / "docs/plans/2026-06-12-album-art-connection-guard.md"
 MAKEFILE_PATH = ROOT / "Makefile"
 EXPECTED_PLAN_SHA256 = (
-    "1317ee18de95cbf935cb2c3a1b5bc1f6123d125bb7ef212445b3eddbd54f9cdb"
+    "a3698f126caa282ffe3242a37dd1bec6e29b0d2fbd086afcf03e324f3937eb3e"
 )
-EXPECTED_TEST_COUNT = 77
+EXPECTED_TEST_COUNT = 91
 TEST_REVIEWED_FILE_SHA256 = {
     "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java": (
-        "a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc"
+        "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d"
     ),
     ".github/workflows/check.yml": (
-        "fed29231b61bddaec646f9ef97fb830a9eb4bd3ad880a0b87f98aa5105a97d72"
+        "3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f"
     ),
 }
 EXPECTED_REVIEWED_BYTE_CONTRACT = '''The following raw bytes were reviewed together:
 
 - `app/src/main/java/com/twitterdev/rdio/app/RdioApp.java`
-  SHA-256: `a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc`
+  SHA-256: `fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d`
 - `.github/workflows/check.yml`
-  SHA-256: `fed29231b61bddaec646f9ef97fb830a9eb4bd3ad880a0b87f98aa5105a97d72`
+  SHA-256: `3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f`
 
 Future legitimate changes require explicit review and coordinated updates to the protected file, checker constant, independent test constant, and this contract stanza.'''
 

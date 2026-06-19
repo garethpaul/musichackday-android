@@ -36,7 +36,9 @@ public class MainActivity extends ActionBarActivity {
     private static SharedPreferences mSharedPreferences;
     private static Twitter twitter;
     private static RequestToken requestToken;
+    private static boolean twitterCallbackExchangeInFlight;
     private AccessToken accessToken;
+    private boolean twitterLoginInFlight;
 
 
     @Override
@@ -83,6 +85,12 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(MainActivity.this, "Twitter login was not started on this device.", Toast.LENGTH_LONG).show();
                     return;
                 }
+                final Twitter callbackTwitter = twitter;
+                final RequestToken callbackRequestToken = requestToken;
+                if (twitterCallbackExchangeInFlight) {
+                    return;
+                }
+                twitterCallbackExchangeInFlight = true;
 
                 try {
 
@@ -92,8 +100,8 @@ public class MainActivity extends ActionBarActivity {
                             try {
 
                                 // Get the access token
-                                accessToken = twitter.getOAuthAccessToken(
-                                        requestToken, verifier);
+                                accessToken = callbackTwitter.getOAuthAccessToken(
+                                        callbackRequestToken, verifier);
                                 // Shared Preferences
                                 mSharedPreferences = getApplicationContext().getSharedPreferences(
                                         "twitter4j-sample", 0);
@@ -106,13 +114,24 @@ public class MainActivity extends ActionBarActivity {
                                 e.putString(Constants.PREF_KEY_OAUTH_SECRET, accessToken.getTokenSecret());
                                 // Store login status - true
                                 e.putBoolean(Constants.PREF_KEY_TWITTER_LOGIN, true);
-                                e.commit(); // save changes
+                                if (!e.commit()) {
+                                    finishTwitterCallbackExchange();
+                                    logTwitterLoginFailure("Credential persistence");
+                                    return;
+                                }
 
-                                Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
-                                startActivity(myIntent);
+                                MainActivity.this.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        twitterCallbackExchangeInFlight = false;
+                                        Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
+                                        startActivity(myIntent);
+                                    }
+                                });
 
                                 // Hide login button
                             } catch (Exception e) {
+                                finishTwitterCallbackExchange();
                                 logTwitterLoginFailure("Access token exchange");
                             }
                         }
@@ -122,6 +141,7 @@ public class MainActivity extends ActionBarActivity {
 
 
                 } catch (Exception e) {
+                    finishTwitterCallbackExchange();
                     logTwitterLoginFailure("OAuth callback handling");
                 }
             }
@@ -177,42 +197,90 @@ public class MainActivity extends ActionBarActivity {
         return expectedToken != null && expectedToken.equals(callbackToken);
     }
 
+    private void finishTwitterCallbackExchange() {
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                twitterCallbackExchangeInFlight = false;
+            }
+        });
+    }
+
+    private boolean isTrustedTwitterAuthenticationUri(Uri uri) {
+        return uri != null
+                && "https".equals(uri.getScheme())
+                && "api.twitter.com".equals(uri.getHost())
+                && uri.getPort() == -1
+                && "/oauth/authenticate".equals(uri.getPath());
+    }
+
 
     private void loginToTwitter() {
         // Check if already logged in
         if (!isTwitterLoggedInAlready()) {
-            // Setup builder
-            ConfigurationBuilder builder = new ConfigurationBuilder();
-            // Get key and secret from Constants.java
-            builder.setOAuthConsumerKey(Constants.API_KEY);
-            builder.setOAuthConsumerSecret(Constants.API_SECRET);
+            if (twitterCallbackExchangeInFlight || twitterLoginInFlight) {
+                return;
+            }
+            twitterLoginInFlight = true;
 
-            // Build
-            Configuration configuration = builder.build();
-            TwitterFactory factory = new TwitterFactory(configuration);
-            twitter = factory.getInstance();
+            try {
+                // Setup builder
+                ConfigurationBuilder builder = new ConfigurationBuilder();
+                // Get key and secret from Constants.java
+                builder.setOAuthConsumerKey(Constants.API_KEY);
+                builder.setOAuthConsumerSecret(Constants.API_SECRET);
 
-            // Start new thread for activity (you can't do too much work on the UI/Main thread.
-            Thread thread = new Thread(new Runnable(){
-                @Override
-                public void run() {
-                    try {
+                // Build
+                Configuration configuration = builder.build();
+                TwitterFactory factory = new TwitterFactory(configuration);
+                twitter = factory.getInstance();
 
-                        requestToken = twitter
-                                .getOAuthRequestToken(Constants.CALLBACKURL);
-                        MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
-                                .parse(requestToken.getAuthenticationURL())));
+                // Start new thread for activity (you can't do too much work on the UI/Main thread.
+                Thread thread = new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        try {
 
-                    } catch (Exception e) {
-                        logTwitterLoginFailure("Request token creation");
+                            requestToken = twitter
+                                    .getOAuthRequestToken(Constants.CALLBACKURL);
+                            final Uri authenticationUri = Uri.parse(requestToken.getAuthenticationURL());
+                            if (!isTrustedTwitterAuthenticationUri(authenticationUri)) {
+                                finishTwitterLoginAttempt();
+                                logTwitterLoginFailure("Authorization URL validation");
+                                return;
+                            }
+                            MainActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    twitterLoginInFlight = false;
+                                    MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri));
+                                }
+                            });
+
+                        } catch (Exception e) {
+                            finishTwitterLoginAttempt();
+                            logTwitterLoginFailure("Request token creation");
+                        }
                     }
-                }
-            });
-            thread.start();
+                });
+                thread.start();
+            } catch (Exception e) {
+                twitterLoginInFlight = false;
+                logTwitterLoginFailure("Request token setup");
+            }
         } else {
             Intent myIntent = new Intent(getBaseContext(), RdioApp.class);
             startActivity(myIntent);
         }
+    }
+
+    private void finishTwitterLoginAttempt() {
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                twitterLoginInFlight = false;
+            }
+        });
     }
 
     private void logTwitterLoginFailure(String action) {

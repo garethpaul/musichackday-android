@@ -27,6 +27,7 @@ Priority:
 - Keep the HTTPS profile image guard at both Twitter URL selection and image loading
 - Keep the album art connection guard around playback artwork networking
 - Keep the stream copy failure guard around utility stream transfers
+- Keep credential-free checkout and location-independent Make verification
 - Keep memory cache entry guards for cleared references and null writes
 - Keep `make lint`, `make test`, `make build`, and `make check` on the
   SDK-free static baseline
@@ -36,6 +37,8 @@ Priority:
 - Keep the OAuth callback verifier guard strict before exchanging access tokens
 - Keep the OAuth callback token guard bound to the active request token
 - Keep sanitized OAuth error logging for Twitter login failures
+- Keep Twitter and Rdio authorization state, credential persistence, UI-thread,
+  playback, and rendering redaction guards in place
 - Keep local editor metadata out of the shared Android project baseline
 - Keep legacy build coordinates pinned for reproducible archaeology
 - Maintain old Android build context for future inspection
@@ -74,6 +77,8 @@ The album art connection guard should keep playback artwork on HTTPS with
 bounded waits, sanitized failures, and deterministic network cleanup.
 The stream copy failure guard should keep utility stream transfers from
 silently accepting failed or partial copies.
+Credential-free checkout and location-independent Make verification should keep
+hosted and local validation scoped to the reviewed checkout.
 Media cache entries should keep using SHA-256 cache filenames so URL-derived
 names remain deterministic without short Java hash collisions.
 The OAuth callback URI guard should keep Twitter verifier exchanges limited to
@@ -86,6 +91,9 @@ The OAuth callback token guard should keep verifier exchange bound to the
 request token created by the local login attempt.
 Sanitized OAuth error logging should keep Twitter login failures out of
 exception-detail and stack-trace logs.
+Twitter and Rdio authorization state, credential persistence, UI-thread,
+playback, and rendering redaction guards should keep provider handoffs bounded
+and sanitized.
 Local editor metadata should stay ignored so IDE workspace choices do not
 change the preserved Android project baseline.
 

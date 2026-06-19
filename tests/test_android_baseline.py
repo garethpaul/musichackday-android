@@ -11,9 +11,15 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKER_PATH = ROOT / "scripts/check-android-baseline.py"
+MAIN_ACTIVITY_PATH = (
+    ROOT / "app/src/main/java/com/twitterdev/rdio/app/MainActivity.java"
+)
 RDIO_APP_PATH = (
     ROOT
     / "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java"
+)
+TWEET_ADAPTER_PATH = (
+    ROOT / "app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java"
 )
 UTILS_PATH = ROOT / "app/src/main/java/com/twitterdev/rdio/app/Utils.java"
 ALBUM_ART_PLAN_PATH = (
@@ -100,6 +106,202 @@ class UtilsCopyStreamContractTests(unittest.TestCase):
                 "catch(Exception ex)",
                 1,
             )
+        )
+
+
+class MainActivityAuthenticationContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.checker = load_checker()
+        cls.source = MAIN_ACTIVITY_PATH.read_text(encoding="utf-8")
+
+    def validate(self, source):
+        validator = getattr(
+            self.checker,
+            "validate_main_activity_authentication_contract",
+            None,
+        )
+        self.assertIsNotNone(
+            validator,
+            "MainActivity authentication contract validator is missing",
+        )
+        return validator(source)
+
+    def assert_rejected(self, source):
+        self.assertTrue(
+            self.validate(source),
+            "mutated MainActivity authentication contract was accepted",
+        )
+
+    def test_accepts_canonical_authentication_contract(self):
+        self.assertEqual([], self.validate(self.source))
+
+    def test_rejects_untrusted_twitter_authorization_uri_launch(self):
+        self.assert_rejected(
+            self.source.replace(
+                "private boolean isTrustedTwitterAuthenticationUri(Uri uri)",
+                "private boolean isTrustedTwitterAuthenticationUriDisabled(Uri uri)",
+                1,
+            )
+        )
+
+    def test_rejects_unchecked_twitter_credential_persistence(self):
+        self.assert_rejected(
+            self.source.replace(
+                "if (!e.commit()) {",
+                "e.commit();\n                                if (false) {",
+                1,
+            )
+        )
+
+    def test_rejects_missing_twitter_callback_inflight_guard(self):
+        self.assert_rejected(
+            self.source.replace(
+                "if (twitterCallbackExchangeInFlight) {\n"
+                "                    return;\n"
+                "                }\n"
+                "                twitterCallbackExchangeInFlight = true;",
+                "twitterCallbackExchangeInFlight = false;",
+                1,
+            )
+        )
+
+    def test_rejects_background_thread_twitter_navigation(self):
+        self.assert_rejected(
+            self.source.replace(
+                "MainActivity.this.runOnUiThread(new Runnable() {\n"
+                "                                @Override\n"
+                "                                public void run() {\n"
+                "                                    twitterLoginInFlight = false;\n"
+                "                                    MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri));\n"
+                "                                }\n"
+                "                            });",
+                "twitterLoginInFlight = false;\n"
+                "                            MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri));",
+                1,
+            )
+        )
+
+
+class RdioRuntimeContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.checker = load_checker()
+        cls.source = RDIO_APP_PATH.read_text(encoding="utf-8")
+
+    def validate(self, source):
+        validator = getattr(self.checker, "validate_rdio_runtime_contract", None)
+        self.assertIsNotNone(validator, "Rdio runtime contract validator is missing")
+        return validator(source)
+
+    def assert_rejected(self, source):
+        self.assertTrue(
+            self.validate(source),
+            "mutated Rdio runtime contract was accepted",
+        )
+
+    def test_accepts_canonical_rdio_runtime_contract(self):
+        self.assertEqual([], self.validate(self.source))
+
+    def test_rejects_unchecked_rdio_credential_persistence(self):
+        self.assert_rejected(
+            self.source.replace(
+                "return editor.commit();",
+                "editor.commit();\n        return true;",
+                1,
+            )
+        )
+
+    def test_rejects_playback_exception_detail_logging(self):
+        self.assert_rejected(
+            self.source.replace(
+                'Log.e(TAG, "Playback preparation failed");',
+                'Log.e("Test", "Exception " + e);',
+                1,
+            )
+        )
+
+    def test_rejects_twitter_search_failure_continuation(self):
+        self.assert_rejected(
+            self.source.replace(
+                'Log.e(TAG, "Twitter search failed");\n'
+                "                return null;",
+                "e.printStackTrace();",
+                1,
+            )
+        )
+
+    def test_rejects_background_thread_search_view_lookup(self):
+        self.assert_rejected(
+            self.source.replace(
+                "runOnUiThread(new Runnable() {\n"
+                "                @Override\n"
+                "                public void run() {\n"
+                "                    final ListView listView = (ListView) findViewById(R.id.list);",
+                "final ListView listView = (ListView) findViewById(R.id.list);\n"
+                "            runOnUiThread(new Runnable() {\n"
+                "                @Override\n"
+                "                public void run() {",
+                1,
+            )
+        )
+
+
+class TweetAdapterRedactionContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.checker = load_checker()
+        cls.source = TWEET_ADAPTER_PATH.read_text(encoding="utf-8")
+
+    def validate(self, source):
+        validator = getattr(self.checker, "validate_tweet_adapter_contract", None)
+        self.assertIsNotNone(validator, "TweetAdapter contract validator is missing")
+        return validator(source)
+
+    def test_accepts_canonical_tweet_adapter_contract(self):
+        self.assertEqual([], self.validate(self.source))
+
+    def test_rejects_tweet_rendering_stack_trace_logging(self):
+        self.assertTrue(
+            self.validate(
+                self.source.replace(
+                    'Log.e(TAG, "Twitter result rendering failed");',
+                    "e.printStackTrace();",
+                    1,
+                )
+            ),
+            "mutated TweetAdapter contract was accepted",
+        )
+
+
+class WorkflowCredentialBoundaryContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.checker = load_checker()
+        cls.source = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    def validate(self, source):
+        validator = getattr(self.checker, "validate_workflow_credential_boundary", None)
+        self.assertIsNotNone(
+            validator,
+            "workflow credential-boundary validator is missing",
+        )
+        return validator(source)
+
+    def test_accepts_canonical_workflow_credential_boundary(self):
+        self.assertEqual([], self.validate(self.source))
+
+    def test_rejects_persisted_checkout_credentials(self):
+        self.assertTrue(
+            self.validate(
+                self.source.replace(
+                    "        with:\n"
+                    "          persist-credentials: false\n",
+                    "",
+                    1,
+                )
+            ),
+            "mutated workflow credential boundary was accepted",
         )
 
 
@@ -553,7 +755,7 @@ class ReviewedByteContractTests(unittest.TestCase):
             runtime_path.write_bytes(mutated)
             self.replace_hash_literal(
                 checker_path,
-                "a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc",
+                "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d",
                 hashlib.sha256(mutated).hexdigest(),
             )
 
@@ -574,7 +776,7 @@ class ReviewedByteContractTests(unittest.TestCase):
             runtime_path.write_bytes(mutated)
             self.replace_hash_literal(
                 test_path,
-                "a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc",
+                "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d",
                 hashlib.sha256(mutated).hexdigest(),
             )
 
@@ -597,7 +799,7 @@ class ReviewedByteContractTests(unittest.TestCase):
             for path in [checker_path, test_path]:
                 self.replace_hash_literal(
                     path,
-                    "a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc",
+                    "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d",
                     new_hash,
                 )
 
@@ -618,7 +820,7 @@ class ReviewedByteContractTests(unittest.TestCase):
             for path in [checker_path, test_path]:
                 self.replace_hash_literal(
                     path,
-                    "fed29231b61bddaec646f9ef97fb830a9eb4bd3ad880a0b87f98aa5105a97d72",
+                    "3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f",
                     new_hash,
                 )
 

@@ -52,6 +52,8 @@ Helpful reports include:
   timeouts, generic errors, and deterministic stream/connection cleanup.
 - The stream copy failure guard should keep utility stream transfers from
   silently accepting failed or partial copies.
+- Hosted checkout should keep credentials out of the local git config, and
+  Make verification should resolve relative to the reviewed checkout.
 - Memory cache entry guards should prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard should accept only the configured callback
   scheme and authority before exchanging Twitter verifier values.
@@ -63,6 +65,17 @@ Helpful reports include:
   active request token before requesting Twitter access tokens.
 - Sanitized OAuth error logging should keep Twitter login failure logs at
   action-level messages without exception details or stack traces.
+- Twitter authorization origin, login in-flight, callback exchange in-flight,
+  callback state snapshot, UI-thread navigation, and credential persistence
+  guards should bound OAuth handoff state and require persistence before
+  navigation.
+- Rdio authorization in-flight, credential persistence, sanitized authorization,
+  API, and playback failure logging, and cleanup lifecycle guards should keep
+  playback setup from using stale credentials or exposing provider error
+  details.
+- Twitter search failure handling, UI-thread list lookup, and TweetAdapter
+  rendering error redaction should keep tweet rendering failure paths bounded
+  and sanitized.
 - Local editor metadata should stay ignored so machine-specific SDK paths,
   workspace state, and IDE module files are not committed.
 

@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_TEST_COUNT = 77
+EXPECTED_TEST_COUNT = 91
 SHADOWED_STDLIB_NAMES = {
     "_hashlib",
     "atexit",
@@ -73,6 +73,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-10-https-profile-images.md",
     "docs/plans/2026-06-12-album-art-connection-guard.md",
     "docs/plans/issue-1-copy-stream-errors.md",
+    "docs/plans/2026-06-19-auth-playback-stack-integration.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -81,26 +82,26 @@ TOKEN_LOG_PATTERNS = [
 ]
 REVIEWED_FILE_SHA256 = {
     "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java": (
-        "a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc"
+        "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d"
     ),
     ".github/workflows/check.yml": (
-        "fed29231b61bddaec646f9ef97fb830a9eb4bd3ad880a0b87f98aa5105a97d72"
+        "3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f"
     ),
 }
 EVIDENCE_PLAN_PATH = "docs/plans/2026-06-12-album-art-connection-guard.md"
 EVIDENCE_PLAN_SHA256 = (
-    "1317ee18de95cbf935cb2c3a1b5bc1f6123d125bb7ef212445b3eddbd54f9cdb"
+    "a3698f126caa282ffe3242a37dd1bec6e29b0d2fbd086afcf03e324f3937eb3e"
 )
 REVIEWED_TEST_SHA256 = {
-    "tests/test_android_baseline.py": "35e88ce1e10ee8174827eda44df6d97ac6a03b264b438acae5a0579fa153bcb8",
-    "tests/test_reviewed_hashes.py": "4009ffe8a0524fa31dca5d43b8340a0d6e8e5ad0bcd1228697c3694d3dbb6b25",
+    "tests/test_android_baseline.py": "6af9ede9e0550f65385bde39a2523cf706db1023e9b0c98476867c5cdcc10dc4",
+    "tests/test_reviewed_hashes.py": "08f52276bd3199d300dadcc3140fb790ea1d7c4b14b3377087b67a662c3a33dd",
 }
 REVIEWED_BYTE_CONTRACT = '''The following raw bytes were reviewed together:
 
 - `app/src/main/java/com/twitterdev/rdio/app/RdioApp.java`
-  SHA-256: `a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc`
+  SHA-256: `fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d`
 - `.github/workflows/check.yml`
-  SHA-256: `fed29231b61bddaec646f9ef97fb830a9eb4bd3ad880a0b87f98aa5105a97d72`
+  SHA-256: `3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f`
 
 Future legitimate changes require explicit review and coordinated updates to the protected file, checker constant, independent test constant, and this contract stanza.'''
 ALBUM_ART_HOSTED_EVIDENCE = '''Completed locally on 2026-06-12:
@@ -130,21 +131,22 @@ The verified implementation preserves `URLUtil.isHttpsUrl(artworkUrl)`,
 `Album art download failed` message.'''
 EXPECTED_MAKEFILE = '''.PHONY: build check lint static-check test unit-test verify
 
+ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 override SHELL := /bin/sh
 override PATH := /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
 override PYTHON := $(shell PATH=$(PATH) command -v python3)
-RDIO_APP_SHA256 := a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc
-WORKFLOW_SHA256 := fed29231b61bddaec646f9ef97fb830a9eb4bd3ad880a0b87f98aa5105a97d72
-TEST_ANDROID_SHA256 := 35e88ce1e10ee8174827eda44df6d97ac6a03b264b438acae5a0579fa153bcb8
-TEST_REVIEWED_SHA256 := 4009ffe8a0524fa31dca5d43b8340a0d6e8e5ad0bcd1228697c3694d3dbb6b25
-EVIDENCE_PLAN_SHA256 := 1317ee18de95cbf935cb2c3a1b5bc1f6123d125bb7ef212445b3eddbd54f9cdb
-EXPECTED_TEST_COUNT := 77
+RDIO_APP_SHA256 := fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d
+WORKFLOW_SHA256 := 3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f
+TEST_ANDROID_SHA256 := 6af9ede9e0550f65385bde39a2523cf706db1023e9b0c98476867c5cdcc10dc4
+TEST_REVIEWED_SHA256 := 08f52276bd3199d300dadcc3140fb790ea1d7c4b14b3377087b67a662c3a33dd
+EVIDENCE_PLAN_SHA256 := a3698f126caa282ffe3242a37dd1bec6e29b0d2fbd086afcf03e324f3937eb3e
+EXPECTED_TEST_COUNT := 91
 
 check verify test unit-test:
-	@set -eu; test -n "$(PYTHON)"; test -x "$(PYTHON)"; $(PYTHON) -I -B -c 'import sys; raise SystemExit(0 if sys.version_info[:2] in {(3, 12), (3, 14)} else 1)'; tmp=$$(/usr/bin/mktemp -d); trap '/bin/rm -rf "$$tmp"' EXIT; /bin/cp scripts/check-android-baseline.py "$$tmp/verifier.py"; /usr/bin/env -u PYTHONPATH -u PYTHONHOME -u PYTHONSTARTUP -u PYTHONPYCACHEPREFIX -u MHD_NESTED_GATE PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -I -B "$$tmp/verifier.py" --root "$(CURDIR)" --expect-python 3.12,3.14 --gate; /usr/bin/git diff --exit-code; /usr/bin/git diff --cached --exit-code; test -z "$$(/usr/bin/git status --porcelain=v1 --untracked-files=all)"
+	@set -eu; test -n "$(PYTHON)"; test -x "$(PYTHON)"; $(PYTHON) -I -B -c 'import sys; raise SystemExit(0 if sys.version_info[:2] in {(3, 12), (3, 14)} else 1)'; tmp=$$(/usr/bin/mktemp -d); trap '/bin/rm -rf "$$tmp"' EXIT; /bin/cp "$(ROOT)/scripts/check-android-baseline.py" "$$tmp/verifier.py"; /usr/bin/env -u PYTHONPATH -u PYTHONHOME -u PYTHONSTARTUP -u PYTHONPYCACHEPREFIX -u MHD_NESTED_GATE PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -I -B "$$tmp/verifier.py" --root "$(ROOT)" --expect-python 3.12,3.14 --gate; /usr/bin/git -C "$(ROOT)" diff --exit-code; /usr/bin/git -C "$(ROOT)" diff --cached --exit-code; test -z "$$(/usr/bin/git -C "$(ROOT)" status --porcelain=v1 --untracked-files=all)"
 
 lint build static-check:
-	@set -eu; test -n "$(PYTHON)"; test -x "$(PYTHON)"; $(PYTHON) -I -B -c 'import sys; raise SystemExit(0 if sys.version_info[:2] in {(3, 12), (3, 14)} else 1)'; tmp=$$(/usr/bin/mktemp -d); trap '/bin/rm -rf "$$tmp"' EXIT; /bin/cp scripts/check-android-baseline.py "$$tmp/verifier.py"; /usr/bin/env -u PYTHONPATH -u PYTHONHOME -u PYTHONSTARTUP -u PYTHONPYCACHEPREFIX -u MHD_NESTED_GATE PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -I -B "$$tmp/verifier.py" --root "$(CURDIR)" --expect-python 3.12,3.14 --static
+	@set -eu; test -n "$(PYTHON)"; test -x "$(PYTHON)"; $(PYTHON) -I -B -c 'import sys; raise SystemExit(0 if sys.version_info[:2] in {(3, 12), (3, 14)} else 1)'; tmp=$$(/usr/bin/mktemp -d); trap '/bin/rm -rf "$$tmp"' EXIT; /bin/cp "$(ROOT)/scripts/check-android-baseline.py" "$$tmp/verifier.py"; /usr/bin/env -u PYTHONPATH -u PYTHONHOME -u PYTHONSTARTUP -u PYTHONPYCACHEPREFIX -u MHD_NESTED_GATE PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -I -B "$$tmp/verifier.py" --root "$(ROOT)" --expect-python 3.12,3.14 --static
 '''
 
 
@@ -513,6 +515,133 @@ def validate_utils_copy_stream_contract(utils_source: str) -> list[str]:
     return failures
 
 
+def validate_workflow_credential_boundary(workflow: str) -> list[str]:
+    failures = []
+    checkout_action = "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10"
+    checkout_blocks = re.findall(
+        rf"(?m)^(?P<indent> *)- +uses: +{re.escape(checkout_action)}[^\n]*\n"
+        rf"(?P=indent)  with:\n"
+        rf"(?P=indent)    persist-credentials: +false *$",
+        workflow,
+    )
+    checkout_actions = re.findall(r"(?m)^\s*-\s+uses:\s+actions/checkout@", workflow)
+    if not (
+        workflow.count("permissions:") == 1
+        and workflow.count("contents: read") == 1
+        and not re.search(r"(?m)^\s*[A-Za-z-]+:\s*write\s*$", workflow)
+        and len(checkout_actions) == 1
+        and workflow.count(checkout_action) == 1
+        and len(checkout_blocks) == 1
+        and workflow.count("persist-credentials: false") == 1
+        and "persist-credentials: true" not in workflow
+    ):
+        failures.append(
+            "Check workflow must keep one read-only permission block and one "
+            "pinned, credential-free checkout"
+        )
+    return failures
+
+
+def validate_main_activity_authentication_contract(main_activity: str) -> list[str]:
+    failures = []
+    required = [
+        "private static boolean twitterCallbackExchangeInFlight;",
+        "private boolean twitterLoginInFlight;",
+        "final Twitter callbackTwitter = twitter;",
+        "final RequestToken callbackRequestToken = requestToken;",
+        "if (twitterCallbackExchangeInFlight) {",
+        "twitterCallbackExchangeInFlight = true;",
+        "private void finishTwitterCallbackExchange()",
+        "if (!e.commit()) {",
+        'logTwitterLoginFailure("Credential persistence")',
+        "private boolean isTrustedTwitterAuthenticationUri(Uri uri)",
+        '"https".equals(uri.getScheme())',
+        '"api.twitter.com".equals(uri.getHost())',
+        "uri.getPort() == -1",
+        '"/oauth/authenticate".equals(uri.getPath())',
+        "if (twitterCallbackExchangeInFlight || twitterLoginInFlight) {",
+        "twitterLoginInFlight = true;",
+        "if (!isTrustedTwitterAuthenticationUri(authenticationUri))",
+        "private void finishTwitterLoginAttempt()",
+    ]
+    for text in required:
+        if text not in main_activity:
+            failures.append(f"MainActivity must preserve authentication contract: {text}")
+
+    trusted_launch = (
+        "MainActivity.this.runOnUiThread(new Runnable() {\n"
+        "                                @Override\n"
+        "                                public void run() {\n"
+        "                                    twitterLoginInFlight = false;\n"
+        "                                    MainActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, authenticationUri));\n"
+        "                                }\n"
+        "                            });"
+    )
+    if trusted_launch not in main_activity:
+        failures.append("MainActivity must launch Twitter authorization on the UI thread")
+    if (
+        "Uri\n                                .parse(requestToken.getAuthenticationURL())"
+        in main_activity
+        or "e.commit(); // save changes" in main_activity
+        or "e.printStackTrace()" in main_activity
+        or "e.getMessage()" in main_activity
+    ):
+        failures.append("MainActivity must not use stale OAuth launch, persistence, or logging paths")
+    return failures
+
+
+def validate_rdio_runtime_contract(rdio_app: str) -> list[str]:
+    failures = []
+    required = [
+        "private boolean rdioAuthorizationInFlight;",
+        "private static final int RDIO_AUTHORIZATION_REQUEST = 1;",
+        "STATE_RDIO_AUTHORIZATION_IN_FLIGHT",
+        "protected void onSaveInstanceState(Bundle outState)",
+        "startRdioAuthorization();",
+        "rdio.cleanup();\n            rdio = null;",
+        'Log.e(TAG, "Playback preparation failed");',
+        "if (!hasRdioCredential(accessToken) || !hasRdioCredential(accessTokenSecret)",
+        "if (!persistRdioCredentials(accessToken, accessTokenSecret))",
+        "requestCode != RDIO_AUTHORIZATION_REQUEST",
+        "clearRdioCredentials();",
+        "rdio.setTokenAndSecret(accessToken, accessTokenSecret);",
+        "rdio.prepareForPlayback();",
+        "private void startRdioAuthorization()",
+        "if (rdioAuthorizationInFlight) {",
+        "private boolean hasRdioCredential(String value)",
+        "private boolean persistRdioCredentials(String token, String tokenSecret)",
+        "return editor.commit();",
+        'Log.e(TAG, "Twitter search failed");\n                return null;',
+        'Log.e(TAG, "Twitter result formatting failed");\n                    continue;',
+        "runOnUiThread(new Runnable() {\n                @Override\n                public void run() {\n                    final ListView listView = (ListView) findViewById(R.id.list);",
+    ]
+    for text in required:
+        if text not in rdio_app:
+            failures.append(f"RdioApp must preserve runtime contract: {text}")
+
+    forbidden = [
+        'Log.e("Test", "Exception " + e)',
+        "e.printStackTrace()",
+        "Log.e(TAG, methodName + \" failed: \", e)",
+        "OAuth1WebViewActivity.EXTRA_ERROR_DESCRIPTION",
+    ]
+    for text in forbidden:
+        if text in rdio_app:
+            failures.append(f"RdioApp must not keep unsafe runtime path: {text}")
+    return failures
+
+
+def validate_tweet_adapter_contract(tweet_adapter: str) -> list[str]:
+    failures = []
+    if "private static final String TAG = \"TweetAdapter\";" not in tweet_adapter:
+        failures.append("TweetAdapter must define a stable sanitized log tag")
+    if 'Log.e(TAG, "Twitter result rendering failed");' not in tweet_adapter:
+        failures.append("TweetAdapter must use sanitized rendering failure logging")
+    if "e.printStackTrace()" in tweet_adapter or "e.getMessage()" in tweet_adapter:
+        failures.append("TweetAdapter must not log provider exception details")
+    return failures
+
+
 def run_static_checks() -> list[str]:
     failures = []
     failures.extend(validate_reviewed_contract_consistency())
@@ -643,6 +772,7 @@ def run_static_checks() -> list[str]:
         failures.append("image loader verbose logging must stay disabled")
 
     main_activity = read_text("app/src/main/java/com/twitterdev/rdio/app/MainActivity.java")
+    failures.extend(validate_main_activity_authentication_contract(main_activity))
     if "uri.toString().startsWith(Constants.CALLBACKURL)" in main_activity:
         failures.append("Twitter OAuth callbacks must not use broad string-prefix matching")
     if (
@@ -692,6 +822,8 @@ def run_static_checks() -> list[str]:
         failures.append("FileCache must not use short Java hashCode values for URL cache filenames")
     if "url-download" in read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java"):
         failures.append("tweet image URLs must not be logged")
+    tweet_adapter = read_text("app/src/main/java/com/twitterdev/rdio/app/TweetAdapter.java")
+    failures.extend(validate_tweet_adapter_contract(tweet_adapter))
     image_download = read_text("app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java")
     if "isHttpsImageUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "URLUtil.isHttpUrl" in image_download or "params.length == 0" not in image_download:
         failures.append("ImageDownload must guard missing URLs and accept only HTTPS images")
@@ -700,6 +832,7 @@ def run_static_checks() -> list[str]:
     rdio_app_path = "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java"
     rdio_app = read_text(rdio_app_path)
     failures.extend(validate_reviewed_file_bytes(rdio_app_path, read_bytes(rdio_app_path)))
+    failures.extend(validate_rdio_runtime_contract(rdio_app))
     if "getBiggerProfileImageURLHttps()" not in rdio_app or "getBiggerProfileImageURL()" in rdio_app:
         failures.append("RdioApp must select Twitter profile images from the HTTPS URL field")
     if "ImageView imageView = imageViewReference.get()" not in image_download or "imageView == null" not in image_download:
@@ -754,6 +887,8 @@ def run_static_checks() -> list[str]:
     failures.extend(
         validate_reviewed_file_bytes(workflow_path, read_bytes(workflow_path))
     )
+    workflow = read_text(workflow_path)
+    failures.extend(validate_workflow_credential_boundary(workflow))
 
     readme = read_text("README.md")
     vision = read_text("VISION.md")

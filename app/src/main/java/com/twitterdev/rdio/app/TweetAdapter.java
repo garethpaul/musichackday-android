@@ -35,6 +35,8 @@ import org.json.JSONObject;
 
 public class TweetAdapter extends BaseAdapter {
 
+    private static final String TAG = "TweetAdapter";
+
     private Activity activity;
     Context context;
     JSONArray data;
@@ -118,8 +120,7 @@ public class TweetAdapter extends BaseAdapter {
 
 
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.e(TAG, "Twitter result rendering failed");
         }
 
         return row;

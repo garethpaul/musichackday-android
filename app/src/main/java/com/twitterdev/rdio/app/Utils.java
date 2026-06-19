@@ -1,5 +1,6 @@
 package com.twitterdev.rdio.app;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -18,6 +19,9 @@ public class Utils {
                 os.write(bytes, 0, count);
             }
         }
-        catch(Exception ex){}
+        catch(IOException ex)
+        {
+            throw new RuntimeException("Unable to copy stream", ex);
+        }
     }
 }

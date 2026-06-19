@@ -85,6 +85,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   and rejects cleartext HTTP again at the loader boundary.
 - The album art connection guard requires HTTPS, applies 10-second connect and
   read timeouts, sanitizes failures, and closes network resources on every path.
+- The stream copy failure guard keeps `Utils.CopyStream` from silently accepting
+  failed or partial stream copies.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard accepts only the configured callback scheme and
   authority before exchanging Twitter verifier values.
@@ -112,6 +114,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   to cleartext HTTP transport.
 - Keep the album art connection guard in place so playback artwork cannot use
   cleartext transport, unbounded waits, or leaked connections.
+- Keep the stream copy failure guard in place so partial stream copies fail
+  visibly instead of looking complete.
 - Keep the OAuth callback URI guard in place so only the configured callback
   endpoint resumes Twitter login.
 - Keep the OAuth callback path guard in place so lookalike callback paths do

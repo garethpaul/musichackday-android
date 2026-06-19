@@ -17,4 +17,15 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.12"
-      - run: make check
+      - run: |
+          set -euo pipefail
+          python_bin="$pythonLocation/bin/python3"
+          test -x "$python_bin"
+          "$python_bin" -I -B -c 'import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 12) else 1)'
+          verifier_dir="$(/usr/bin/mktemp -d)"
+          trap '/bin/rm -rf "$verifier_dir"' EXIT
+          /bin/cp scripts/check-android-baseline.py "$verifier_dir/verifier.py"
+          /usr/bin/env -i HOME="$HOME" PATH="/usr/bin:/bin" GITHUB_WORKSPACE="$GITHUB_WORKSPACE" PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 "$python_bin" -I -B "$verifier_dir/verifier.py" --root "$GITHUB_WORKSPACE" --expect-python 3.12 --gate
+          /usr/bin/git diff --exit-code
+          /usr/bin/git diff --cached --exit-code
+          test -z "$(/usr/bin/git status --porcelain=v1 --untracked-files=all)"

@@ -87,6 +87,9 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   read timeouts, sanitizes failures, and closes network resources on every path.
 - The stream copy failure guard keeps `Utils.CopyStream` from silently accepting
   failed or partial stream copies.
+- The hosted checkout keeps credentials out of the local git config, and the
+  Make gates resolve paths relative to this checkout even when invoked with
+  `make -f`.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard accepts only the configured callback scheme and
   authority before exchanging Twitter verifier values.
@@ -98,6 +101,15 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   request token before exchanging Twitter verifier values.
 - Sanitized OAuth error logging keeps Twitter login failures at action-level
   messages without exception details or stack traces.
+- Twitter authorization origin, login in-flight, callback exchange in-flight,
+  callback state snapshot, UI-thread navigation, and credential persistence
+  guards keep OAuth handoff state bounded and persisted before navigation.
+- Rdio authorization in-flight, credential persistence, sanitized authorization,
+  API, and playback failure logging, and cleanup lifecycle guards keep playback
+  setup from using stale credentials or leaking provider error details.
+- Twitter search failure handling, UI-thread list lookup, and TweetAdapter
+  rendering error redaction keep tweet rendering failure paths bounded and
+  sanitized.
 - Local editor metadata stays ignored so Android Studio and VS Code workspace
   files do not become part of the shared verification baseline.
 
@@ -116,6 +128,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   cleartext transport, unbounded waits, or leaked connections.
 - Keep the stream copy failure guard in place so partial stream copies fail
   visibly instead of looking complete.
+- Keep credential-free checkout and location-independent Make verification in
+  place so hosted and local gates use the reviewed checkout boundary.
 - Keep the OAuth callback URI guard in place so only the configured callback
   endpoint resumes Twitter login.
 - Keep the OAuth callback path guard in place so lookalike callback paths do
@@ -126,6 +140,9 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
   token cannot resume the local Twitter login.
 - Keep sanitized OAuth error logging in place so failed Twitter login attempts
   do not write provider exception details to Android logs.
+- Keep the Twitter and Rdio authorization, credential persistence, UI-thread,
+  playback, and rendering redaction guards in place when changing auth or media
+  flows.
 - Review changes touching database, model, or persistence code; examples from the scan include app/src/main/java/com/twitterdev/rdio/app/RdioApp.java.
 
 ## Maintenance Notes

@@ -6,6 +6,15 @@
   connect/read timeouts, sanitized failures, and deterministic cleanup.
 - Added a stream copy failure guard so `Utils.CopyStream` reports read/write
   failures instead of silently accepting partial copies.
+- Added credential-free checkout and location-independent Make verification
+  while preserving the protected SDK-free baseline.
+- Added Twitter authorization origin, login in-flight, callback exchange
+  in-flight, callback state snapshot, UI-thread navigation, and credential
+  persistence guards.
+- Added Rdio authorization in-flight, credential persistence, sanitized
+  authorization/API/playback failures, and cleanup lifecycle guards.
+- Added Twitter search failure handling, UI-thread list lookup, and TweetAdapter
+  rendering error redaction.
 - Added an HTTPS profile image guard so Twitter media uses the encrypted URL
   field and cleartext HTTP is rejected by the image loader.
 - Added pinned, read-only Linux hosted validation for the SDK-free Android

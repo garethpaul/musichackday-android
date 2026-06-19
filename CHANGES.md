@@ -4,6 +4,8 @@
 
 - Added an album art connection guard with HTTPS-only transport, 10-second
   connect/read timeouts, sanitized failures, and deterministic cleanup.
+- Added a stream copy failure guard so `Utils.CopyStream` reports read/write
+  failures instead of silently accepting partial copies.
 - Added an HTTPS profile image guard so Twitter media uses the encrypted URL
   field and cleartext HTTP is rejected by the image loader.
 - Added pinned, read-only Linux hosted validation for the SDK-free Android

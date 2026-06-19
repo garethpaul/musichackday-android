@@ -26,6 +26,7 @@ Priority:
 - Keep the HTTP image URL guard before loading remote media
 - Keep the HTTPS profile image guard at both Twitter URL selection and image loading
 - Keep the album art connection guard around playback artwork networking
+- Keep the stream copy failure guard around utility stream transfers
 - Keep memory cache entry guards for cleared references and null writes
 - Keep `make lint`, `make test`, `make build`, and `make check` on the
   SDK-free static baseline
@@ -71,6 +72,8 @@ The HTTPS profile image guard should keep profile media on encrypted transport
 from Twitter URL selection through the loader boundary.
 The album art connection guard should keep playback artwork on HTTPS with
 bounded waits, sanitized failures, and deterministic network cleanup.
+The stream copy failure guard should keep utility stream transfers from
+silently accepting failed or partial copies.
 Media cache entries should keep using SHA-256 cache filenames so URL-derived
 names remain deterministic without short Java hash collisions.
 The OAuth callback URI guard should keep Twitter verifier exchanges limited to

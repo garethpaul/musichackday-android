@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_TEST_COUNT = 73
+EXPECTED_TEST_COUNT = 77
 SHADOWED_STDLIB_NAMES = {
     "_hashlib",
     "atexit",
@@ -50,6 +50,7 @@ REQUIRED_FILES = [
     "app/src/main/java/com/twitterdev/rdio/app/FileCache.java",
     "app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java",
     "app/src/main/java/com/twitterdev/rdio/app/MemoryCache.java",
+    "app/src/main/java/com/twitterdev/rdio/app/Utils.java",
     "app/libs/rdio-android-sdk.jar",
     "app/libs/signpost-commonshttp4-1.2.1.1.jar",
     "app/libs/signpost-core-1.2.1.1.jar",
@@ -71,6 +72,7 @@ REQUIRED_FILES = [
     "docs/plans/2026-06-10-hosted-static-validation.md",
     "docs/plans/2026-06-10-https-profile-images.md",
     "docs/plans/2026-06-12-album-art-connection-guard.md",
+    "docs/plans/issue-1-copy-stream-errors.md",
 ]
 TOKEN_LOG_PATTERNS = [
     re.compile(r"Log\.[a-z]\([^;]*(accessToken|accessTokenSecret|getToken\(|getTokenSecret\()", re.IGNORECASE),
@@ -90,8 +92,8 @@ EVIDENCE_PLAN_SHA256 = (
     "1317ee18de95cbf935cb2c3a1b5bc1f6123d125bb7ef212445b3eddbd54f9cdb"
 )
 REVIEWED_TEST_SHA256 = {
-    "tests/test_android_baseline.py": "a8ae01def94e7e74278681ea80ba185dd01a520307a69795aed6d9434aeb9fbd",
-    "tests/test_reviewed_hashes.py": "c4c47932788dbab6b9fb4630cce424ee47814fc36605f04edcf59255b2d57a7e",
+    "tests/test_android_baseline.py": "35e88ce1e10ee8174827eda44df6d97ac6a03b264b438acae5a0579fa153bcb8",
+    "tests/test_reviewed_hashes.py": "4009ffe8a0524fa31dca5d43b8340a0d6e8e5ad0bcd1228697c3694d3dbb6b25",
 }
 REVIEWED_BYTE_CONTRACT = '''The following raw bytes were reviewed together:
 
@@ -133,10 +135,10 @@ override PATH := /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
 override PYTHON := $(shell PATH=$(PATH) command -v python3)
 RDIO_APP_SHA256 := a93c3d16a4626087bf777b515b0469cb91b445be473e7abbb32cfe1277bf66bc
 WORKFLOW_SHA256 := fed29231b61bddaec646f9ef97fb830a9eb4bd3ad880a0b87f98aa5105a97d72
-TEST_ANDROID_SHA256 := a8ae01def94e7e74278681ea80ba185dd01a520307a69795aed6d9434aeb9fbd
-TEST_REVIEWED_SHA256 := c4c47932788dbab6b9fb4630cce424ee47814fc36605f04edcf59255b2d57a7e
+TEST_ANDROID_SHA256 := 35e88ce1e10ee8174827eda44df6d97ac6a03b264b438acae5a0579fa153bcb8
+TEST_REVIEWED_SHA256 := 4009ffe8a0524fa31dca5d43b8340a0d6e8e5ad0bcd1228697c3694d3dbb6b25
 EVIDENCE_PLAN_SHA256 := 1317ee18de95cbf935cb2c3a1b5bc1f6123d125bb7ef212445b3eddbd54f9cdb
-EXPECTED_TEST_COUNT := 73
+EXPECTED_TEST_COUNT := 77
 
 check verify test unit-test:
 	@set -eu; test -n "$(PYTHON)"; test -x "$(PYTHON)"; $(PYTHON) -I -B -c 'import sys; raise SystemExit(0 if sys.version_info[:2] in {(3, 12), (3, 14)} else 1)'; tmp=$$(/usr/bin/mktemp -d); trap '/bin/rm -rf "$$tmp"' EXIT; /bin/cp scripts/check-android-baseline.py "$$tmp/verifier.py"; /usr/bin/env -u PYTHONPATH -u PYTHONHOME -u PYTHONSTARTUP -u PYTHONPYCACHEPREFIX -u MHD_NESTED_GATE PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -I -B "$$tmp/verifier.py" --root "$(CURDIR)" --expect-python 3.12,3.14 --gate; /usr/bin/git diff --exit-code; /usr/bin/git diff --cached --exit-code; test -z "$$(/usr/bin/git status --porcelain=v1 --untracked-files=all)"
@@ -483,6 +485,34 @@ def validate_makefile_contract(makefile: str) -> list[str]:
     return []
 
 
+def validate_utils_copy_stream_contract(utils_source: str) -> list[str]:
+    failures = []
+    if "import java.io.IOException;" not in utils_source:
+        failures.append("Utils.CopyStream must declare the IOException boundary")
+
+    method_match = re.search(
+        r"(?s)public\s+static\s+void\s+CopyStream\s*"
+        r"\(\s*InputStream\s+is\s*,\s*OutputStream\s+os\s*\)\s*\{(.*)\n\s*\}",
+        utils_source,
+    )
+    method_body = method_match.group(1) if method_match else ""
+    if not method_body:
+        failures.append("Utils.CopyStream method body must remain present")
+        return failures
+
+    if re.search(r"catch\s*\(\s*(?:Exception|Throwable)\s+\w+\s*\)", method_body):
+        failures.append("Utils.CopyStream must not catch broad stream-copy failures")
+    if "catch(IOException ex)" not in method_body:
+        failures.append("Utils.CopyStream must catch IOException explicitly")
+    if 'throw new RuntimeException("Unable to copy stream", ex);' not in method_body:
+        failures.append(
+            "Utils.CopyStream must rethrow copy failures with diagnostic context"
+        )
+    if re.search(r"catch\s*\([^)]*\)\s*\{\s*\}", method_body):
+        failures.append("Utils.CopyStream must not swallow copy failures")
+    return failures
+
+
 def run_static_checks() -> list[str]:
     failures = []
     failures.extend(validate_reviewed_contract_consistency())
@@ -665,6 +695,8 @@ def run_static_checks() -> list[str]:
     image_download = read_text("app/src/main/java/com/twitterdev/rdio/app/ImageDownload.java")
     if "isHttpsImageUrl" not in image_download or "URLUtil.isHttpsUrl" not in image_download or "URLUtil.isHttpUrl" in image_download or "params.length == 0" not in image_download:
         failures.append("ImageDownload must guard missing URLs and accept only HTTPS images")
+    utils_source = read_text("app/src/main/java/com/twitterdev/rdio/app/Utils.java")
+    failures.extend(validate_utils_copy_stream_contract(utils_source))
     rdio_app_path = "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java"
     rdio_app = read_text(rdio_app_path)
     failures.extend(validate_reviewed_file_bytes(rdio_app_path, read_bytes(rdio_app_path)))
@@ -696,6 +728,7 @@ def run_static_checks() -> list[str]:
         "docs/plans/2026-06-10-hosted-static-validation.md",
         "docs/plans/2026-06-10-https-profile-images.md",
         "docs/plans/2026-06-12-album-art-connection-guard.md",
+        "docs/plans/issue-1-copy-stream-errors.md",
     ]:
         if not (ROOT / relative_path).is_file():
             continue
@@ -753,6 +786,8 @@ def run_static_checks() -> list[str]:
             failures.append(f"{relative_path} must document standard Make gate targets")
         if "album art connection guard" not in text.lower():
             failures.append(f"{relative_path} must document the album art connection guard")
+        if "stream copy failure guard" not in text.lower():
+            failures.append(f"{relative_path} must document the stream copy failure guard")
     if "image download guard" not in changes.lower():
         failures.append("CHANGES must record image download guardrails")
     if "sha-256 cache filenames" not in changes.lower():
@@ -765,6 +800,8 @@ def run_static_checks() -> list[str]:
         failures.append("CHANGES must record HTTPS profile image guardrails")
     if "album art connection guard" not in changes.lower():
         failures.append("CHANGES must record album art connection guardrails")
+    if "stream copy failure guard" not in changes.lower():
+        failures.append("CHANGES must record stream copy failure guardrails")
     if "oauth callback uri guard" not in changes.lower():
         failures.append("CHANGES must record OAuth callback URI guardrails")
     if "oauth callback path guard" not in changes.lower():

@@ -15,6 +15,7 @@ RDIO_APP_PATH = (
     ROOT
     / "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java"
 )
+UTILS_PATH = ROOT / "app/src/main/java/com/twitterdev/rdio/app/Utils.java"
 ALBUM_ART_PLAN_PATH = (
     ROOT / "docs/plans/2026-06-12-album-art-connection-guard.md"
 )
@@ -45,6 +46,61 @@ def initialize_scratch_repository(root):
     )
     subprocess.run(["git", "add", "-A"], cwd=root, check=True)
     subprocess.run(["git", "commit", "-qm", "scratch baseline"], cwd=root, check=True)
+
+
+class UtilsCopyStreamContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.checker = load_checker()
+        cls.source = UTILS_PATH.read_text(encoding="utf-8")
+
+    def validate(self, source):
+        validator = getattr(
+            self.checker,
+            "validate_utils_copy_stream_contract",
+            None,
+        )
+        self.assertIsNotNone(validator, "Utils.CopyStream contract validator is missing")
+        return validator(source)
+
+    def assert_rejected(self, source):
+        self.assertTrue(
+            self.validate(source),
+            "mutated Utils.CopyStream contract was accepted",
+        )
+
+    def test_accepts_canonical_copy_stream_contract(self):
+        self.assertEqual([], self.validate(self.source))
+
+    def test_rejects_swallowed_copy_stream_exception(self):
+        self.assert_rejected(
+            self.source.replace(
+                "catch(IOException ex)\n"
+                "        {\n"
+                "            throw new RuntimeException(\"Unable to copy stream\", ex);\n"
+                "        }",
+                "catch(Exception ex){}",
+                1,
+            )
+        )
+
+    def test_rejects_missing_copy_stream_diagnostic_rethrow(self):
+        self.assert_rejected(
+            self.source.replace(
+                "throw new RuntimeException(\"Unable to copy stream\", ex);",
+                "return;",
+                1,
+            )
+        )
+
+    def test_rejects_missing_io_exception_boundary(self):
+        self.assert_rejected(
+            self.source.replace("import java.io.IOException;\n", "", 1).replace(
+                "catch(IOException ex)",
+                "catch(Exception ex)",
+                1,
+            )
+        )
 
 
 class AlbumArtConnectionContractTests(unittest.TestCase):

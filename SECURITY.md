@@ -50,6 +50,8 @@ Helpful reports include:
   reject cleartext HTTP at the loader boundary.
 - The album art connection guard should require HTTPS, bounded connect/read
   timeouts, generic errors, and deterministic stream/connection cleanup.
+- The stream copy failure guard should keep utility stream transfers from
+  silently accepting failed or partial copies.
 - Memory cache entry guards should prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard should accept only the configured callback
   scheme and authority before exchanging Twitter verifier values.

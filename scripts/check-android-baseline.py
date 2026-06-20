@@ -131,7 +131,7 @@ The verified implementation preserves `URLUtil.isHttpsUrl(artworkUrl)`,
 `Album art download failed` message.'''
 EXPECTED_MAKEFILE = '''.PHONY: build check lint static-check test unit-test verify
 
-ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 override SHELL := /bin/sh
 override PATH := /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
 override PYTHON := $(shell PATH=$(PATH) command -v python3)

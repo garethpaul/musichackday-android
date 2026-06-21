@@ -90,6 +90,9 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - The hosted checkout keeps credentials out of the local git config, and the
   Make gates resolve paths relative to this checkout even when invoked with
   `make -f`.
+- Absolute Makefile paths containing spaces, brackets, or apostrophes retain
+  the complete checkout root. `ROOT` overrides are ignored, and attempts to
+  override GNU Make's `MAKEFILE_LIST` metadata fail closed.
 - Memory cache entry guards prune cleared soft references and skip null cache writes.
 - The OAuth callback URI guard accepts only the configured callback scheme and
   authority before exchanging Twitter verifier values.

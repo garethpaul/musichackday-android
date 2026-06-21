@@ -1055,6 +1055,59 @@ class MakefileContractTests(unittest.TestCase):
     def test_accepts_unit_tests_in_check_and_test_targets(self):
         self.assertEqual([], self.checker.validate_makefile_contract(self.makefile))
 
+    def run_hostile_make(self, *arguments, environment=None):
+        with tempfile.TemporaryDirectory(prefix="musichackday make path ") as temporary:
+            temporary_root = Path(temporary)
+            checkout = temporary_root / "checkout [hostile] 'quote"
+            checkout.mkdir()
+            makefile = checkout / "Makefile"
+            shutil.copyfile(MAKEFILE_PATH, makefile)
+            external = temporary_root / "external caller"
+            external.mkdir()
+            env = os.environ.copy()
+            if environment:
+                env.update(environment)
+            result = subprocess.run(
+                ["make", "--no-print-directory", "-n", "-f", str(makefile), *arguments],
+                cwd=external,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return result, str(checkout)
+
+    def test_all_aliases_preserve_spaced_absolute_makefile_path(self):
+        for target in ("check", "verify", "test", "unit-test", "lint", "build", "static-check"):
+            for name, arguments, environment in (
+                ("none", (target,), None),
+                ("command", (target, "ROOT=/tmp/attacker-root"), None),
+                ("environment", (target,), {"ROOT": "/tmp/attacker-root"}),
+            ):
+                with self.subTest(target=target, override=name):
+                    result, checkout = self.run_hostile_make(
+                        *arguments, environment=environment
+                    )
+                    self.assertEqual(0, result.returncode, result.stderr)
+                    self.assertIn(checkout, result.stdout)
+                    self.assertNotIn("/tmp/attacker-root", result.stdout)
+
+    def test_command_line_makefile_list_override_fails_closed(self):
+        result, _ = self.run_hostile_make(
+            "check", "MAKEFILE_LIST=/tmp/attacker-root/Makefile"
+        )
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("MAKEFILE_LIST must not be overridden", result.stderr)
+
+    def test_environment_makefile_list_override_fails_closed(self):
+        result, _ = self.run_hostile_make(
+            "-e",
+            "check",
+            environment={"MAKEFILE_LIST": "/tmp/attacker-root/Makefile"},
+        )
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("MAKEFILE_LIST must not be overridden", result.stderr)
+
     def test_rejects_check_without_unit_tests(self):
         old_makefile = self.makefile.replace(
             "check verify test unit-test:",

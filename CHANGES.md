@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-21
+
+- Preserved the complete checkout root for absolute Makefile paths containing
+  spaces, brackets, or apostrophes, and rejected `MAKEFILE_LIST` overrides.
+- Expanded the protected SDK-free baseline from 91 to 94 tests with hostile
+  path and root-override regression coverage.
+
 ## 2026-06-10
 
 - Added an album art connection guard with HTTPS-only transport, 10-second

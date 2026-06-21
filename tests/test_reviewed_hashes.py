@@ -14,7 +14,7 @@ MAKEFILE_PATH = ROOT / "Makefile"
 EXPECTED_PLAN_SHA256 = (
     "a3698f126caa282ffe3242a37dd1bec6e29b0d2fbd086afcf03e324f3937eb3e"
 )
-EXPECTED_TEST_COUNT = 91
+EXPECTED_TEST_COUNT = 94
 TEST_REVIEWED_FILE_SHA256 = {
     "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java": (
         "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d"

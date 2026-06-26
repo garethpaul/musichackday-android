@@ -22,6 +22,9 @@ the reviewed HTTPS URL remains the only network destination for that request.
 - Python 3.12.12 and 3.14.6 each passed repository and external-directory
   `make check` with all 98 protected tests.
 - Reviewed runtime, evidence-plan, test, and Makefile hash contracts passed.
+- Hosted baseline runs `28254470240` and `28254472873` passed, and CodeQL run
+  `28254471020` passed Actions, Java/Kotlin, and Python analysis on
+  implementation commit `0dddba605fc32539b051d47142ecae7938fcdb05`.
 
 ### Findings
 
@@ -32,6 +35,8 @@ the reviewed HTTPS URL remains the only network destination for that request.
 
 - No legacy Android SDK/emulator is available; runtime media behavior remains
   outside the static verification claim.
+- Codex review was attempted once and skipped after HTTP 401 failures on both
+  WebSocket and HTTPS transports.
 
 ### Next action
 

@@ -38,7 +38,11 @@ https://developer.android.com/reference/java/net/HttpURLConnection
   external-directory `make check` with all 98 protected tests, exact reviewed
   bytes, clean-tree enforcement, and no skips.
 - `git diff --check` and credential-pattern review passed.
-- Hosted results will be recorded after the pull-request head completes.
+- Hosted baseline runs `28254470240` and `28254472873` passed, and CodeQL run
+  `28254471020` passed Actions, Java/Kotlin, and Python analysis on
+  implementation commit `0dddba605fc32539b051d47142ecae7938fcdb05`.
+- `codex review --base master` was attempted once and failed authentication with
+  HTTP 401 on both WebSocket and HTTPS transports.
 
 ## Boundaries
 

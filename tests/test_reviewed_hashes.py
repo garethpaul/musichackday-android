@@ -12,12 +12,12 @@ CHECKER_PATH = ROOT / "scripts/check-android-baseline.py"
 PLAN_PATH = ROOT / "docs/plans/2026-06-12-album-art-connection-guard.md"
 MAKEFILE_PATH = ROOT / "Makefile"
 EXPECTED_PLAN_SHA256 = (
-    "a3698f126caa282ffe3242a37dd1bec6e29b0d2fbd086afcf03e324f3937eb3e"
+    "5ae0ed781d90602a39ec83d7619b1416b5ba4a4629492c164fdc40f8cbb80535"
 )
-EXPECTED_TEST_COUNT = 97
+EXPECTED_TEST_COUNT = 98
 TEST_REVIEWED_FILE_SHA256 = {
     "app/src/main/java/com/twitterdev/rdio/app/RdioApp.java": (
-        "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d"
+        "a71008d19f4811c217a420ff8828f2ebf7f45969055fbd515584c896d67239ec"
     ),
     ".github/workflows/check.yml": (
         "3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f"
@@ -26,7 +26,7 @@ TEST_REVIEWED_FILE_SHA256 = {
 EXPECTED_REVIEWED_BYTE_CONTRACT = '''The following raw bytes were reviewed together:
 
 - `app/src/main/java/com/twitterdev/rdio/app/RdioApp.java`
-  SHA-256: `fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d`
+  SHA-256: `a71008d19f4811c217a420ff8828f2ebf7f45969055fbd515584c896d67239ec`
 - `.github/workflows/check.yml`
   SHA-256: `3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f`
 

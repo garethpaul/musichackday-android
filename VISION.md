@@ -27,6 +27,7 @@ Priority:
 - Keep the HTTP image URL guard before loading remote media
 - Keep the HTTPS profile image guard at both Twitter URL selection and image loading
 - Keep the album art connection guard around playback artwork networking
+- Keep album-art redirects disabled after the initial HTTPS validation
 - Keep the stream copy failure guard around utility stream transfers
 - Keep credential-free checkout and location-independent Make verification
 - Keep memory cache entry guards for cleared references and null writes
@@ -75,7 +76,8 @@ loading.
 The HTTPS profile image guard should keep profile media on encrypted transport
 from Twitter URL selection through the loader boundary.
 The album art connection guard should keep playback artwork on HTTPS with
-bounded waits, sanitized failures, and deterministic network cleanup.
+bounded waits, disabled redirects, sanitized failures, and deterministic
+network cleanup.
 The stream copy failure guard should keep utility stream transfers from
 silently accepting failed or partial copies.
 Credential-free checkout and location-independent Make verification should keep

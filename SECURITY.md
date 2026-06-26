@@ -51,7 +51,8 @@ Helpful reports include:
 - The HTTPS profile image guard should select Twitter's HTTPS media field and
   reject cleartext HTTP at the loader boundary.
 - The album art connection guard should require HTTPS, bounded connect/read
-  timeouts, generic errors, and deterministic stream/connection cleanup.
+  timeouts, disabled redirects, generic errors, and deterministic
+  stream/connection cleanup.
 - The stream copy failure guard should keep utility stream transfers from
   silently accepting failed or partial copies.
 - Hosted checkout should keep credentials out of the local git config, and

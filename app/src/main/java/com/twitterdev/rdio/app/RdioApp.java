@@ -388,6 +388,7 @@ public class RdioApp extends Activity implements RdioListener {
                     try {
                         URL aURL = new URL(artworkUrl);
                         connection = (HttpURLConnection) aURL.openConnection();
+                        connection.setInstanceFollowRedirects(false);
                         connection.setConnectTimeout(10000);
                         connection.setReadTimeout(10000);
                         connection.connect();

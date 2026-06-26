@@ -86,7 +86,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - The HTTPS profile image guard selects Twitter's encrypted profile-image URL
   and rejects cleartext HTTP again at the loader boundary.
 - The album art connection guard requires HTTPS, applies 10-second connect and
-  read timeouts, sanitizes failures, and closes network resources on every path.
+  read timeouts, disables automatic redirects, sanitizes failures, and closes
+  network resources on every path.
 - The stream copy failure guard keeps `Utils.CopyStream` from silently accepting
   failed or partial stream copies.
 - The hosted checkout keeps credentials out of the local git config, and the
@@ -130,7 +131,7 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Keep the HTTPS profile image guard in place so profile media cannot fall back
   to cleartext HTTP transport.
 - Keep the album art connection guard in place so playback artwork cannot use
-  cleartext transport, unbounded waits, or leaked connections.
+  cleartext transport, automatic redirects, unbounded waits, or leaked connections.
 - Keep the stream copy failure guard in place so partial stream copies fail
   visibly instead of looking complete.
 - Keep credential-free checkout and location-independent Make verification in

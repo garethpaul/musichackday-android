@@ -1,5 +1,47 @@
 # Changes
 
+## 2026-06-26 10:25 PDT - P1 - Disable album-art redirects
+
+### Summary
+
+Disabled automatic redirects on the direct album-art `HttpURLConnection` so
+the reviewed HTTPS URL remains the only network destination for that request.
+
+### Files changed
+
+- `RdioApp.java` — disabled per-connection redirects before connect.
+- `tests/test_android_baseline.py` — required the redirect guard before connect.
+- `scripts/check-android-baseline.py`, `tests/test_reviewed_hashes.py`, and
+  `Makefile` — synchronized reviewed bytes and the protected test inventory.
+- `README.md`, `SECURITY.md`, `VISION.md`, and the implementation plans —
+  documented the fail-closed redirect boundary.
+
+### Tests
+
+- RED: the focused contract failed because redirects were left at their default.
+- Python 3.12.12 and 3.14.6 each passed repository and external-directory
+  `make check` with all 98 protected tests.
+- Reviewed runtime, evidence-plan, test, and Makefile hash contracts passed.
+- Hosted baseline runs `28254470240` and `28254472873` passed, and CodeQL run
+  `28254471020` passed Actions, Java/Kotlin, and Python analysis on
+  implementation commit `0dddba605fc32539b051d47142ecae7938fcdb05`.
+
+### Findings
+
+- Android documents that `HttpURLConnection` follows redirects by default.
+- The existing HTTPS check covered only the initial URL, not a redirected target.
+
+### Blockers
+
+- No legacy Android SDK/emulator is available; runtime media behavior remains
+  outside the static verification claim.
+- Codex review was attempted once and skipped after HTTP 401 failures on both
+  WebSocket and HTTPS transports.
+
+### Next action
+
+- Require exact-head hosted static checks and CodeQL before merge.
+
 ## 2026-06-26
 
 - Guarded `DynamicImageView` aspect-ratio measurement behind positive drawable

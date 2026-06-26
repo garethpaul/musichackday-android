@@ -13,8 +13,9 @@ This can expose URL data, hang a playback refresh, or leak network resources.
 
 1. Reject non-HTTPS album-art URLs before opening a connection.
 2. Apply bounded connect and read timeouts.
-3. Close input streams and disconnect the HTTP connection in all paths.
-4. Keep failure logging generic and free of media URLs or exception details.
+3. Disable automatic redirects so initial HTTPS validation remains authoritative.
+4. Close input streams and disconnect the HTTP connection in all paths.
+5. Keep failure logging generic and free of media URLs or exception details.
 
 ## Implementation Units
 
@@ -44,6 +45,7 @@ document the SDK-free verification boundary.
 
 - Required HTTPS before opening the album-art connection.
 - Added 10-second connect and read timeouts.
+- Disabled automatic redirects before connecting.
 - Closed the buffered input stream and disconnected the HTTP connection from
   the `finally` path.
 - Replaced URL and exception-bearing failure logs with a generic message.
@@ -74,6 +76,7 @@ Completed on GitHub Actions for verified predecessor/implementation head
 This verified predecessor/implementation head is not the final evidence-only head.
 
 The verified implementation preserves `URLUtil.isHttpsUrl(artworkUrl)`,
+`connection.setInstanceFollowRedirects(false)`,
 `connection.setConnectTimeout(10000)`, `connection.setReadTimeout(10000)`,
 `bufferedInputStream.close()`, `connection.disconnect()`, and the sanitized
 `Album art download failed` message.
@@ -83,7 +86,7 @@ The verified implementation preserves `URLUtil.isHttpsUrl(artworkUrl)`,
 The following raw bytes were reviewed together:
 
 - `app/src/main/java/com/twitterdev/rdio/app/RdioApp.java`
-  SHA-256: `fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d`
+  SHA-256: `a71008d19f4811c217a420ff8828f2ebf7f45969055fbd515584c896d67239ec`
 - `.github/workflows/check.yml`
   SHA-256: `3ac196785a75b7a744a1690a396feac24cf1b1fffd189dc2474ff01e6d01b57f`
 

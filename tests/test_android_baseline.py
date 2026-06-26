@@ -349,6 +349,14 @@ class AlbumArtConnectionContractTests(unittest.TestCase):
         )
         self.assert_rejected(source)
 
+    def test_requires_redirects_disabled_before_connect(self):
+        redirect_guard = "connection.setInstanceFollowRedirects(false);"
+        self.assertIn(redirect_guard, self.canonical)
+        self.assertLess(
+            self.canonical.index(redirect_guard),
+            self.canonical.index("connection.connect();"),
+        )
+
     def test_rejects_unreachable_close_and_disconnect(self):
         source = self.source.replace(
             "if (bufferedInputStream != null) {",
@@ -787,7 +795,7 @@ class ReviewedByteContractTests(unittest.TestCase):
             runtime_path.write_bytes(mutated)
             self.replace_hash_literal(
                 checker_path,
-                "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d",
+                "a71008d19f4811c217a420ff8828f2ebf7f45969055fbd515584c896d67239ec",
                 hashlib.sha256(mutated).hexdigest(),
             )
 
@@ -808,7 +816,7 @@ class ReviewedByteContractTests(unittest.TestCase):
             runtime_path.write_bytes(mutated)
             self.replace_hash_literal(
                 test_path,
-                "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d",
+                "a71008d19f4811c217a420ff8828f2ebf7f45969055fbd515584c896d67239ec",
                 hashlib.sha256(mutated).hexdigest(),
             )
 
@@ -831,7 +839,7 @@ class ReviewedByteContractTests(unittest.TestCase):
             for path in [checker_path, test_path]:
                 self.replace_hash_literal(
                     path,
-                    "fb91ad06a10932969adf680e877b76db2b4c0559513cf2bccb471fbb5fd1bc3d",
+                    "a71008d19f4811c217a420ff8828f2ebf7f45969055fbd515584c896d67239ec",
                     new_hash,
                 )
 

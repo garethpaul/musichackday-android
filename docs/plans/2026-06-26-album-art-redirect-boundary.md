@@ -32,7 +32,13 @@ https://developer.android.com/reference/java/net/HttpURLConnection
 ## Results
 
 - RED: the focused test failed because no redirect policy was set.
-- Full local and hosted results will be recorded after verification completes.
+- GREEN: the focused runtime-order contract passed after redirects were disabled
+  before `connect()`.
+- Python 3.12.12 and Python 3.14.6 each passed repository and
+  external-directory `make check` with all 98 protected tests, exact reviewed
+  bytes, clean-tree enforcement, and no skips.
+- `git diff --check` and credential-pattern review passed.
+- Hosted results will be recorded after the pull-request head completes.
 
 ## Boundaries
 

@@ -19,7 +19,9 @@ the reviewed HTTPS URL remains the only network destination for that request.
 ### Tests
 
 - RED: the focused contract failed because redirects were left at their default.
-- Full SDK-free verification will be recorded in the implementation plan.
+- Python 3.12.12 and 3.14.6 each passed repository and external-directory
+  `make check` with all 98 protected tests.
+- Reviewed runtime, evidence-plan, test, and Makefile hash contracts passed.
 
 ### Findings
 

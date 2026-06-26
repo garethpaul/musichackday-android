@@ -18,7 +18,9 @@ public class DynamicImageView extends ImageView {
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
         final Drawable d = this.getDrawable();
 
-        if (d != null) {
+        if (d != null &&
+                d.getIntrinsicWidth() > 0 &&
+                d.getIntrinsicHeight() > 0) {
             // ceil not round - avoid thin vertical gaps along the left/right edges
             final int width = MeasureSpec.getSize(widthMeasureSpec);
             final int height = (int) Math.ceil(width * (float) d.getIntrinsicHeight() / d.getIntrinsicWidth());

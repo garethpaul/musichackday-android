@@ -1,5 +1,15 @@
 # Changes
 
+## 2026-06-26
+
+- Guarded `DynamicImageView` aspect-ratio measurement behind positive drawable
+  intrinsic dimensions, falling back to platform measurement otherwise.
+- Added three mutation-sensitive contract tests for valid, zero-width, and
+  zero-height guard behavior; the protected SDK-free suite now runs 97 tests.
+- Updated README, security guidance, roadmap, and the completed implementation
+  plan. Android runtime layout verification remains unavailable in this legacy
+  SDK-free environment.
+
 ## 2026-06-21
 
 - Preserved the complete checkout root for absolute Makefile paths containing

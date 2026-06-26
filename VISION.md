@@ -23,6 +23,7 @@ Priority:
 - Keep OAuth access tokens and media-fetch debug details out of Android log output
 - Keep media cache entries on SHA-256 cache filenames in app-private storage
 - Keep image download guards around media URLs and recycled row image views
+- Keep dynamic image measurement guarded by positive intrinsic dimensions
 - Keep the HTTP image URL guard before loading remote media
 - Keep the HTTPS profile image guard at both Twitter URL selection and image loading
 - Keep the album art connection guard around playback artwork networking

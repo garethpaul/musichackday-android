@@ -45,6 +45,8 @@ Helpful reports include:
 - Cached profile and album images should use SHA-256 cache filenames rather
   than short Java hashes for URL-derived names.
 - Image download guards should skip invalid media URLs and recycled row image views before invoking the loader.
+- Dimensionless or malformed drawables fall back to platform measurement
+  instead of producing invalid or attacker-amplified image row heights.
 - The HTTP image URL guard should keep local or non-web URI schemes out of image loading.
 - The HTTPS profile image guard should select Twitter's HTTPS media field and
   reject cleartext HTTP at the loader boundary.

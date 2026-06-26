@@ -80,6 +80,8 @@ permissions, image download guards, and HTTPS Gradle wrapper downloads.
 - Image cache entries use SHA-256 cache filenames derived from media URLs while
   staying inside the app-private cache directory.
 - Image download guards should keep invalid media URLs and recycled row image views from reaching Universal Image Loader.
+- Dynamic image measurement falls back to the platform when a drawable lacks
+  positive intrinsic dimensions, avoiding invalid or enormous row heights.
 - The HTTP image URL guard should keep non-HTTP(S) media references out of image loading.
 - The HTTPS profile image guard selects Twitter's encrypted profile-image URL
   and rejects cleartext HTTP again at the loader boundary.

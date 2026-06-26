@@ -531,6 +531,38 @@ class AlbumArtConnectionContractTests(unittest.TestCase):
         self.assert_rejected(self.source + "\n" + canonical + "\n")
 
 
+class DynamicImageViewContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.checker = load_checker()
+        cls.source = (
+            ROOT
+            / "app/src/main/java/com/twitterdev/rdio/app/DynamicImageView.java"
+        ).read_text(encoding="utf-8")
+
+    def assert_rejected(self, source):
+        self.assertTrue(
+            self.checker.validate_dynamic_image_view_contract(source),
+            "mutated DynamicImageView measurement contract was accepted",
+        )
+
+    def test_accepts_positive_intrinsic_dimension_guard(self):
+        self.assertEqual(
+            [],
+            self.checker.validate_dynamic_image_view_contract(self.source),
+        )
+
+    def test_rejects_missing_positive_intrinsic_width_guard(self):
+        self.assert_rejected(
+            self.source.replace("d.getIntrinsicWidth() > 0", "d.getIntrinsicWidth() >= 0", 1)
+        )
+
+    def test_rejects_missing_positive_intrinsic_height_guard(self):
+        self.assert_rejected(
+            self.source.replace("d.getIntrinsicHeight() > 0", "d.getIntrinsicHeight() >= 0", 1)
+        )
+
+
 class ReviewedByteContractTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
